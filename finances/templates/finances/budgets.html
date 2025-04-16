@@ -12,6 +12,13 @@ profile.html{% extends 'base.html' %}
       <div class="col mx-auto text-center mb-3">
         <h4>Hi</h4>
       </div>
+        <ul>
+          {% for budget in user.budgets.all %}
+            <li>Category: {{budget.category}}, Limit: {{budget.limit}}, Expense: {{budget.expense}}</li>
+          {% empty %}
+            <li>No budgets found</li>
+          {% endfor %}
+        </ul>
     </div>
   </div>
 </div>
