@@ -1,6 +1,7 @@
-profile.html{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% block content %}
 <header class="masthead bg-index text-white text-center py-4">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <div class="container d-flex align-items-center flex-column pt-2">
     <h2>Profile</h2>
     <p>Insert Text Here</p>
@@ -11,15 +12,32 @@ profile.html{% extends 'base.html' %}
     <div class="row mt-3">
       <div class="col mx-auto text-center mb-3">
         <h4>Hi</h4>
-      </div>
-        <ul>
+          <ul>
           {% for budget in user.budgets.all %}
             <li>Category: {{budget.category}}, Limit: {{budget.limit}}, Expense: {{budget.expense}}</li>
           {% empty %}
             <li>No budgets found</li>
           {% endfor %}
         </ul>
+        <button id="show-popup">Enter New Budget</button>
+        <div id="popup-overlay"></div>
+        <div id="popup-modal"></div>
+      </div>
     </div>
   </div>
 </div>
+
+<script>
+        $('#show-popup').click(function() {
+            $.get("{% url 'finances.budgets_form' %}", function(data) {
+                $('#popup-modal').html(data).show();
+                $('#popup-overlay').show();
+            });
+        });
+
+        $('#popup-overlay').click(function() {
+            $('#popup-modal').hide();
+            $('#popup-overlay').hide();
+        });
+    </script>
 {% endblock content %}
