@@ -1,0 +1,52 @@
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+.expense {
+    background-color: #ffdddd;
+}
+
+.income {
+    background-color: #ddffdd;
+}
+
+.transaction-box {
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.transaction-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transaction-content form {
+    margin: 0;
+}
+
+.transaction-content button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.transaction-content button:hover {
+    background-color: #c0392b;
+}
+
+/* Optional style for the empty message */
+li:only-child {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}

@@ -1,18 +1,71 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <header class="masthead bg-index text-white text-center py-4">
-  <div class="container d-flex align-items-center flex-column pt-2">
-    <h2>Profile</h2>
-    <p>Insert Text Here</p>
-  </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="{% static 'css/transactions.css' %}">
+    <div class="container d-flex align-items-center flex-column pt-2">
+        <h2>Profile</h2>
+        <p>Insert Text Here</p>
+    </div>
 </header>
 <div class="p-3">
   <div class="container">
     <div class="row mt-3">
       <div class="col mx-auto text-center mb-3">
-        <h4>Hi</h4>
+        <h4>Transactions</h4>
+          <ul>
+            {% for transaction in user.transactions.all %}
+                <li>
+                    <div class="{% if transaction.isExpense %}expense{% else %}income{% endif %} transaction-box">
+                        <div class="transaction-content">
+                            <div>
+                                <strong>{{ transaction.name }}</strong><br>
+                                {{ transaction.description }} - ${{ transaction.amount }}
+                            </div>
+                            <div class="action-buttons">
+                                <button class="edit-btn" data-id="{{ transaction.id }}">Edit</button>
+                                <form action="{% url 'finances.delete_transaction' transaction.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" onclick="return confirm('Delete this transaction?');">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            {% empty %}
+                <li>No transactions found</li>
+            {% endfor %}
+            </ul>
+        <button id="show-popup">Enter New Transaction</button>
+        <div id="popup-overlay"></div>
+        <div id="popup-modal"></div>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+        $('#show-popup').click(function() {
+            $.get("{% url 'finances.transactions_form' %}", function(data) {
+                $('#popup-modal').html(data).show();
+                $('#popup-overlay').show();
+            });
+        });
+
+        $(document).on('click', '.edit-btn', function () {
+            const transactionId = $(this).data('id');
+            $.get(`/finances/transactions/edit/${transactionId}/`, function(data) {
+                $('#popup-modal').html(data).show();
+                $('#popup-overlay').show();
+            });
+        });
+
+        $('#popup-overlay').click(function() {
+            $('#popup-modal').hide();
+            $('#popup-overlay').hide();
+        });
+    </script>
 {% endblock content %}
