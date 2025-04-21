@@ -34,3 +34,17 @@ def get_dynamic_color(category):
         color_index = (color_index + 1) % len(PASTEL_COLORS)
 
     return assigned_colors[category.id]
+
+@register.filter
+def divide(value, arg):
+    try:
+        return float(value) / float(arg)
+    except (ValueError, ZeroDivisionError):
+        return 0
+
+@register.filter
+def multiply(value, arg):
+    try:
+        return float(value) * float(arg)
+    except ValueError:
+        return 0

@@ -299,12 +299,12 @@
                 if (type === 'date') {
                     valA = new Date($(a).find('.text-muted:last').text().trim());
                     valB = new Date($(b).find('.text-muted:last').text().trim());
-                    return valA - valB;
+                    return valB - valA;
                 }
                 else if (type === 'amount') {
                     valA = parseFloat($(a).find('.transaction-content div:first-child').text().split('$')[1]);
                     valB = parseFloat($(b).find('.transaction-content div:first-child').text().split('$')[1]);
-                    return valA - valB;
+                    return valB - valA;
                 }
                 else if (type === 'category') {
                     // Get category order from sidebar

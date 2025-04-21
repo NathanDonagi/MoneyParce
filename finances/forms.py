@@ -38,7 +38,7 @@ class BudgetForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field_name in self.fields:
             self.fields[field_name].help_text = None
-        self.fields['category'].queryset = Category.objects.all()
+        self.fields['category'].empty_label = ""
 
 
 class TransactionForm(forms.ModelForm):
