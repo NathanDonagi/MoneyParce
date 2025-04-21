@@ -21,6 +21,27 @@
       <!-- Budgets Column -->
       <div class="col-md-8 text-center mb-3">
         <h4>Budgets</h4>
+        <div class="text-center mb-4">
+          <h5>Total Spending</h5>
+          <div class="progress" style="height: 20px;">
+            {% with percentage=total_expense|divide:total_limit|multiply:100 %}
+            <div class="progress-bar
+              {% if percentage > 90 %}bg-danger
+              {% elif percentage > 70 %}bg-warning
+              {% else %}bg-success{% endif %}"
+              role="progressbar"
+              style="width: {{ percentage }}%"
+              aria-valuenow="{{ percentage }}"
+              aria-valuemin="0"
+              aria-valuemax="100">
+            </div>
+            {% endwith %}
+          </div>
+          <small>
+            ${{ total_expense|floatformat:2 }} of ${{ total_limit|floatformat:2 }}
+            ({{ total_expense|divide:total_limit|multiply:100|floatformat:0 }}%)
+          </small>
+        </div>
 
         <!-- Sort Buttons -->
         <div class="sort-buttons mb-3">

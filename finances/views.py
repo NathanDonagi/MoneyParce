@@ -1,7 +1,7 @@
 import json # Add json import
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction # Import transaction
-from django.db.models import Max # Import Max
+from django.db.models import Max, Sum  # Import Max
 from django.template.context_processors import request
 from django.views.decorators.http import require_POST, require_http_methods  # Import require_POST
 from django.http import JsonResponse, HttpResponseRedirect  # Import JsonResponse
@@ -15,9 +15,24 @@ from django.http import HttpResponse
 
 @login_required(login_url='login')
 def profile(request):
+    user = request.user
     template_data = {'title': 'Profile'}
+    budgets = Budget.objects.filter(user=user)
+    total_limit = budgets.aggregate(Sum('limit'))['limit__sum'] or 0
+    total_expense = budgets.aggregate(Sum('expense'))['expense__sum'] or 0
+
+    advice = [
+        "Make sure to track your expenses regularly to stay on top of your budget.",
+        "Consider setting up alerts when you're close to reaching your budget limits.",
+        "Review your spending habits monthly to avoid unnecessary expenses."
+    ]
+
     return render(request, 'finances/profile.html', {
-        'template_data': template_data})
+        'template_data': template_data,
+        'total_limit': total_limit,
+        'total_expense': total_expense,
+        'advice': advice,
+    })
 
 
 @login_required
@@ -151,10 +166,15 @@ def reorder_categories(request):
 @login_required(login_url='login')
 def budgets(request):
     user = request.user
-    categories = Category.objects.filter(user=user).order_by('order')  # Add order_by here
+    budgets =  Budget.objects.filter(user=user)
+    total_limit = budgets.aggregate(Sum('limit'))['limit__sum'] or 0
+    total_expense = budgets.aggregate(Sum('expense'))['expense__sum'] or 0
+
+    categories = Category.objects.filter(user=user).order_by('order')
     template_data = {'title': 'Budgets'}
     return render(request, 'finances/budgets.html', {
-        'template_data': template_data, 'categories': categories})
+        'template_data': template_data, 'categories': categories,
+        'total_limit': total_limit, 'total_expense': total_expense,})
 
 @login_required(login_url='login')
 def budgets_form(request):
