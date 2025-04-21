@@ -9,4 +9,5 @@ urlpatterns = [
     path('transactions/delete/<uuid:transaction_id>/', views.delete_transaction, name='finances.delete_transaction'),
     path('transactions/edit/<uuid:transaction_id>/', views.edit_transaction, name='finances.edit_transaction'),
     path('progress/', views.progress, name='finances.progress'),
+    path('ask/', views.gemini_help, name='gemini_help'),
 ]

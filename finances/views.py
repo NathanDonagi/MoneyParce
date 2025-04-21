@@ -4,6 +4,36 @@ from .forms import BudgetForm, TransactionForm, CustomErrorList
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
+from django.http import JsonResponse
+from .utils import get_chat_model
+
+from django.shortcuts import render
+import google.generativeai as genai
+from django.conf import settings
+
+def ask_gemini(request):
+    if request.method == 'POST':
+        user_input = request.POST.get('user_input')
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(user_input)
+        return render(request, 'myapp/result.html', {'response': response.text, 'user_input': user_input})
+    return render(request, 'myapp/form.html')
+
+@login_required(login_url='login')
+def gemini_help(request):
+    if request.method == 'POST':
+        prompt = request.POST.get('prompt', '')
+
+        try:
+            model = get_chat_model()
+            response = model.generate_content(prompt)
+            return JsonResponse({'response': response.text})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
 @login_required(login_url='login')
 def profile(request):
     template_data = {'title': 'Profile'}
