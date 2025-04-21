@@ -4,7 +4,7 @@ from django.db import transaction # Import transaction
 from django.db.models import Max # Import Max
 from django.template.context_processors import request
 from django.views.decorators.http import require_POST, require_http_methods  # Import require_POST
-from django.http import JsonResponse # Import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect  # Import JsonResponse
 
 
 from .models import Budget, Transaction, Category
@@ -26,7 +26,8 @@ def create_category(request):
         form = CategoryForm(request.POST, user=request.user)
         if form.is_valid():
             form.save()
-            return redirect('finances.transactions')  # Or wherever your main transaction page is
+            next = request.POST.get('next', '/')
+            return HttpResponseRedirect(next)
     else:
         form = CategoryForm(user=request.user)
 
@@ -149,9 +150,11 @@ def reorder_categories(request):
 
 @login_required(login_url='login')
 def budgets(request):
+    user = request.user
+    categories = Category.objects.filter(user=user).order_by('order')  # Add order_by here
     template_data = {'title': 'Budgets'}
     return render(request, 'finances/budgets.html', {
-        'template_data': template_data})
+        'template_data': template_data, 'categories': categories})
 
 @login_required(login_url='login')
 def budgets_form(request):
@@ -172,6 +175,34 @@ def budgets_form(request):
             template_data['form'] = budget_form
             return render(request, 'finances/budgetsForm.html', {
                 'template_data': template_data})
+
+@login_required(login_url='login')
+def delete_budget(request, budget_id):
+    budget = get_object_or_404(Budget, id=budget_id, user=request.user)
+
+    if request.method == "POST":
+        budget.delete()
+        return redirect('finances.budgets')
+
+@login_required(login_url='login')
+def edit_budget(request, budget_id):
+    budget = get_object_or_404(Budget, id=budget_id, user=request.user)
+    template_data = {'title': 'Edit Budget'}
+
+
+    if request.method == 'POST':
+        form = BudgetForm(request.POST, instance=budget, error_class=CustomErrorList)
+        if form.is_valid():
+            budget = form.save(commit=False)
+            budget.user = request.user
+            budget.save()
+            return redirect('finances.budgets')
+        template_data['form'] = form
+    else:
+        template_data['form'] = BudgetForm(instance=budget)
+
+    return render(request, 'finances/budgetEditForm.html',
+                  {'template_data': template_data, 'budget': budget})
 
 @login_required(login_url='login')
 def transactions(request):
