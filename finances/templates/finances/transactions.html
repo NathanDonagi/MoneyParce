@@ -1,71 +1,351 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load custom_filters %}
+
 {% block content %}
 <header class="masthead bg-index text-white text-center py-4">
+    <!-- Load jQuery first -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Then load jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
     <link rel="stylesheet" href="{% static 'css/transactions.css' %}">
-    <div class="container d-flex align-items-center flex-column pt-2">
-        <h2>Profile</h2>
-        <p>Insert Text Here</p>
-    </div>
 </header>
-<div class="p-3">
+
+<!-- Page content wrapper -->
+<div id="page-content" class="p-3">
   <div class="container">
     <div class="row mt-3">
-      <div class="col mx-auto text-center mb-3">
+
+      <!-- Transactions Column -->
+      <div class="col-md-8 text-center mb-3">
         <h4>Transactions</h4>
-          <ul>
-            {% for transaction in user.transactions.all %}
-                <li>
-                    <div class="{% if transaction.isExpense %}expense{% else %}income{% endif %} transaction-box">
-                        <div class="transaction-content">
-                            <div>
-                                <strong>{{ transaction.name }}</strong><br>
-                                {{ transaction.description }} - ${{ transaction.amount }}
-                            </div>
-                            <div class="action-buttons">
-                                <button class="edit-btn" data-id="{{ transaction.id }}">Edit</button>
-                                <form action="{% url 'finances.delete_transaction' transaction.id %}" method="post">
-                                    {% csrf_token %}
-                                    <button type="submit" onclick="return confirm('Delete this transaction?');">
-                                        Delete
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+
+        <!-- Sort Buttons -->
+        <div class="sort-buttons mb-3">
+          <button id="sort-date" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Date</button>
+          <button id="sort-amount" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Amount</button>
+          <button id="sort-category" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Category</button>
+        </div>
+
+        <ul class="list-unstyled" id="transaction-list">
+          {% for transaction in user.transactions.all %}
+            {% with color=transaction.category|get_dynamic_color %}
+              <li>
+                <div class="{% if transaction.isExpense %}expense{% else %}income{% endif %} transaction-box" style="background-color: {{ color }};">
+                  <div class="transaction-strip {% if transaction.isExpense %}expense-strip{% else %}income-strip{% endif %}"></div>
+
+                  <div class="transaction-content row w-100">
+                      <div class="col text-start">
+                        <div class="text-muted small">{{ transaction.category.name }}</div>
+                        <strong>{{ transaction.name }}</strong><br>
+                        {{ transaction.description }} - ${{ transaction.amount|floatformat:2 }}
+                      </div>
+                      <div class="col-auto text-end">
+                        <div class="text-muted small">{{ transaction.date|date:"M d, Y" }}</div>
+                        <button class="edit-btn btn btn-sm btn-warning mt-1" data-id="{{ transaction.id }}">Edit</button>
+                        <form action="{% url 'finances.delete_transaction' transaction.id %}" method="post" class="d-inline">
+                          {% csrf_token %}
+                          <button type="submit" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Delete this transaction?');">
+                            Delete
+                          </button>
+                        </form>
+                      </div>
                     </div>
-                </li>
-            {% empty %}
-                <li>No transactions found</li>
-            {% endfor %}
-            </ul>
-        <button id="show-popup">Enter New Transaction</button>
-        <div id="popup-overlay"></div>
-        <div id="popup-modal"></div>
+                </div>
+              </li>
+            {% endwith %}
+          {% empty %}
+            <li>No transactions found</li>
+          {% endfor %}
+        </ul>
+
+        <button id="show-popup" class="btn btn-primary mt-3">Enter New Transaction</button>
       </div>
+
+      <!-- Categories Sidebar -->
+      <div class="col-md-4">
+        <div class="p-3 border rounded bg-light">
+          <h5>Current Categories</h5>
+          <ul class="list-group mb-3" id="category-list">
+            {% for category in categories %}
+              {% with color=category|get_dynamic_color %}
+                <li class="list-group-item category-item"
+                    style="background-color: {{ color }};"
+                    data-id="{{ category.id }}">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="category-name" data-id="{{ category.id }}">{{ category.name }}</span>
+                    <button class="delete-category-btn btn btn-sm btn-danger"
+                            data-id="{{ category.id }}"
+                            data-name="{{ category.name }}">
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              {% endwith %}
+            {% empty %}
+              <li class="list-group-item">No categories yet</li>
+            {% endfor %}
+          </ul>
+          <button id="add-category-btn" class="btn btn-secondary btn-sm">Add Category</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
+<!-- Popup overlay and modal -->
+<div id="popup-overlay"></div>
+<div id="popup-modal"></div>
+
 <script>
-        $('#show-popup').click(function() {
-            $.get("{% url 'finances.transactions_form' %}", function(data) {
-                $('#popup-modal').html(data).show();
-                $('#popup-overlay').show();
+    // Function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $(document).ready(function() {
+        // Initialize sortable on category list
+        $("#category-list").sortable({
+            items: ".category-item",
+            cursor: "move",
+            opacity: 0.7,
+            placeholder: "ui-sortable-placeholder",
+            update: function(event, ui) {
+                // Get the new order of categories
+                const order = [];
+                $("#category-list .category-item").each(function() {
+                    order.push($(this).data('id'));
+                });
+
+                // Send to server to save
+                $.ajax({
+                    url: "{% url 'finances.reorder_categories' %}",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ order: order }),
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    success: function(response) {
+                        console.log("Order saved:", response);
+                        // If sorted by category, re-sort transactions
+                        if ($('#sort-category').hasClass('active')) {
+                            sortTransactions('category');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error saving order:", error);
+                    }
+                });
+            }
+        }).disableSelection();
+
+        function openModalWithContent(url) {
+            $.get(url, function(data) {
+                $('#popup-modal').html(data).fadeIn();
+                $('#popup-overlay').fadeIn();
+                $('body').addClass('modal-open');
             });
+        }
+
+        // Modal event handlers
+        $('#show-popup').click(function() {
+            openModalWithContent("{% url 'finances.transactions_form' %}");
         });
 
-        $(document).on('click', '.edit-btn', function () {
-            const transactionId = $(this).data('id');
-            $.get(`/finances/transactions/edit/${transactionId}/`, function(data) {
-                $('#popup-modal').html(data).show();
-                $('#popup-overlay').show();
-            });
+        $('#add-category-btn').click(function() {
+            openModalWithContent("{% url 'finances.create_category' %}");
         });
 
         $('#popup-overlay').click(function() {
-            $('#popup-modal').hide();
-            $('#popup-overlay').hide();
+            $('#popup-modal').fadeOut();
+            $('#popup-overlay').fadeOut();
+            $('body').removeClass('modal-open');
         });
-    </script>
+
+        $(document).on('click', '.edit-btn', function() {
+            const transactionId = $(this).data('id');
+            openModalWithContent(`/finances/transactions/edit/${transactionId}/`);
+        });
+
+        $(document).on('click', '.delete-category-btn', function() {
+            const categoryId = $(this).data('id');
+            const categoryName = $(this).data('name');
+
+            if (confirm(`Are you sure you want to delete the category "${categoryName}"?`)) {
+                $.ajax({
+                    url: `/finances/categories/delete/${categoryId}/`,
+                    type: "DELETE",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Remove the category from the UI
+                            $(`.category-item[data-id="${categoryId}"]`).remove();
+                            // Reload transactions if sorted by category
+                            if ($('#sort-category').hasClass('active')) {
+                                sortTransactions('category');
+                            }
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            alert(response.message || "Error deleting category");
+                        } catch {
+                            alert("Error deleting category");
+                        }
+                    }
+                });
+            }
+        });
+
+        $(document).on('click', '.category-name', function() {
+            // Don't start editing if we're already editing
+            if ($(this).closest('.category-item').hasClass('editing')) return;
+
+            const categoryId = $(this).data('id');
+            const currentName = $(this).text().trim();
+            const $categoryItem = $(this).closest('.category-item');
+            const $span = $(this);
+
+            // Set editing state
+            $categoryItem.addClass('editing');
+
+            // Create input field
+            const $input = $('<input type="text">')
+                .val(currentName)
+                .addClass('form-control form-control-sm category-edit-input')
+                .css({
+                    'display': 'inline-block',
+                    'width': 'auto'
+                });
+
+            $span.replaceWith($input);
+            $input.focus();
+
+            function completeEdit() {
+                const newName = $input.val().trim();
+
+                if (newName && newName !== currentName) {
+                    $.ajax({
+                        url: `/finances/categories/rename/${categoryId}/`,
+                        type: "POST",
+                        data: {
+                            'new_name': newName,
+                            'csrfmiddlewaretoken': getCookie("csrftoken")
+                        },
+                        success: function(response) {
+                            $categoryItem.removeClass('editing');
+                            if (response.success) {
+                                const $newSpan = $('<span class="category-name">')
+                                    .text(newName)
+                                    .data('id', categoryId);
+                                $input.replaceWith($newSpan);
+
+                                // Update transactions
+                                $(`.transaction-box .text-muted.small:contains('${currentName}')`)
+                                    .text(newName);
+                            } else {
+                                alert(response.message);
+                                $input.replaceWith($span.text(currentName));
+                            }
+                        },
+                        error: function() {
+                            $categoryItem.removeClass('editing');
+                            alert("Error updating category name");
+                            $input.replaceWith($span.text(currentName));
+                        }
+                    });
+                } else {
+                    $categoryItem.removeClass('editing');
+                    $input.replaceWith($span.text(currentName));
+                }
+            }
+
+            $input.on('keyup', function(e) {
+                if (e.key === 'Enter') completeEdit();
+                if (e.key === 'Escape') {
+                    $categoryItem.removeClass('editing');
+                    $input.replaceWith($span.text(currentName));
+                }
+            }).on('blur', completeEdit);
+        });
+
+        // Sorting functionality
+        function sortTransactions(type) {
+            let transactions = $('#transaction-list li').get();
+
+            transactions.sort(function(a, b) {
+                let valA, valB;
+
+                if (type === 'date') {
+                    valA = new Date($(a).find('.text-muted:last').text().trim());
+                    valB = new Date($(b).find('.text-muted:last').text().trim());
+                    return valA - valB;
+                }
+                else if (type === 'amount') {
+                    valA = parseFloat($(a).find('.transaction-content div:first-child').text().split('$')[1]);
+                    valB = parseFloat($(b).find('.transaction-content div:first-child').text().split('$')[1]);
+                    return valA - valB;
+                }
+                else if (type === 'category') {
+                    // Get category order from sidebar
+                    const categoryOrder = [];
+                    $("#category-list .category-item").each(function() {
+                        categoryOrder.push($(this).find('span').first().text().trim()); // Changed to find the span text
+                    });
+
+                    valA = $(a).find('.text-muted:first').text().trim();
+                    valB = $(b).find('.text-muted:first').text().trim();
+
+                    return categoryOrder.indexOf(valA) - categoryOrder.indexOf(valB);
+                }
+            });
+
+            // Update the DOM
+            $('#transaction-list').empty().append(transactions);
+        }
+
+        // Sort button event handlers
+        $('.sort-btn').click(function() {
+            $('.sort-btn').removeClass('active');
+            $(this).addClass('active');
+            const sortType = $(this).attr('id').split('-')[1];
+            localStorage.setItem('lastSortType', sortType); // Save to localStorage
+            sortTransactions(sortType);
+        });
+
+        // Apply saved sort preference on page load
+        const savedSortType = localStorage.getItem('lastSortType');
+        if (savedSortType) {
+            $(`.sort-btn`).removeClass('active');
+            $(`#sort-${savedSortType}`).addClass('active');
+            sortTransactions(savedSortType);
+        } else {
+            // Default to date sort if no preference exists
+            if ($('.sort-btn.active').length === 0) {
+                $('#sort-date').addClass('active');
+            }
+        }
+    });
+</script>
+
 {% endblock content %}
