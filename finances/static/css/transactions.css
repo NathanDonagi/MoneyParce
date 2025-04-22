@@ -1,0 +1,108 @@
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+/* Remove static expense/income colors — replaced by dynamic category colors */
+.expense {
+    background-color: #ffdddd;
+}
+
+.income {
+    background-color: #ddffdd;
+}
+
+.transaction-box {
+    padding: 10px 10px 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    position: relative;
+    overflow: hidden;
+}
+
+.transaction-strip {
+    width: 5px;
+    border-radius: 5px 0 0 5px;
+}
+
+.income-strip {
+    background-color: green;
+}
+
+.expense-strip {
+    background-color: red;
+}
+
+.transaction-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-grow: 1;
+    padding-left: 10px;
+}
+
+.transaction-content form {
+    margin: 0;
+}
+
+.transaction-content button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.transaction-content button:hover {
+    background-color: #c0392b;
+}
+
+/* Optional style for the empty message */
+li:only-child {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+/* Modal styling */
+#popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh; width: 100vw;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+#popup-modal {
+  display: none;
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  background: white;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  border-radius: 12px;
+}
+
+body.modal-open #page-content {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Sort button highlighting */
+.sort-btn.active {
+  background-color: #0d6efd;
+  color: white;
+}
+

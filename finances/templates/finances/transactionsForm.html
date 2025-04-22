@@ -1,0 +1,23 @@
+{% block content %}
+<div class="p-3 mt-4">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card shadow p-3 mb-4 rounded">
+          <div class="card-body">
+            <h2>Enter Transaction</h2>
+            <hr />
+            <form action="{% url 'finances.transactions_form' %}" method="POST">
+              {% csrf_token %}
+              {{ template_data.form.as_p }}
+              <button type="submit"
+                class="btn bg-dark text-white">Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

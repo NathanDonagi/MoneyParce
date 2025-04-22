@@ -1,9 +1,4 @@
-.bg-index{
-  background: url("/static/img/background.jpg") no-repeat
-    fixed;
-  background-size: 100% auto;
-}
-
+/* Existing styles */
 .navbar a.nav-link {
   color: #FFFEF6 !important;
 }
@@ -26,7 +21,7 @@
   text-decoration: none;
 }
 
-.ms-footer-bottom span{
+.ms-footer-bottom span {
   font-size: 13px;
   line-height: 38px;
 }
@@ -61,3 +56,149 @@
     margin-top: auto;
 }
 
+/* New styles for transactions page */
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px;
+}
+
+.transaction-box {
+    padding: 10px 10px 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    position: relative;
+    overflow: hidden;
+}
+
+.transaction-strip {
+    width: 5px;
+    border-radius: 5px 0 0 5px;
+}
+
+.income-strip {
+    background-color: #2ecc71;
+}
+
+.expense-strip {
+    background-color: #ff4c4c;
+}
+
+.transaction-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-grow: 1;
+    padding-left: 10px;
+}
+
+.transaction-content form {
+    margin: 0;
+}
+
+.transaction-content button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.transaction-content button:hover {
+    background-color: #c0392b;
+}
+
+/* Empty message style */
+li:only-child {
+    text-align: center;
+    font-style: italic;
+    color: #666;
+}
+
+/* Modal styling */
+#popup-overlay {
+  display: none;
+  position: fixed;
+  top: 0; 
+  left: 0;
+  height: 100vh; 
+  width: 100vw;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+#popup-modal {
+  display: none;
+  position: fixed;
+  top: 50%; 
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 500px;
+  background: white;
+  padding: 20px;
+  z-index: 1000;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  border-radius: 12px;
+}
+
+body.modal-open #page-content {
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Sort button highlighting */
+.sort-btn.active {
+  background-color: #0d6efd;
+  color: white;
+}
+
+/* Drag and drop styles */
+#category-list .ui-sortable-helper {
+  background: #f8f9fa !important;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+#category-list .ui-sortable-placeholder {
+  background: #e9ecef !important;
+  visibility: visible !important;
+  height: 38px !important;
+  border: 1px dashed #adb5bd;
+}
+
+.category-item {
+  cursor: move;
+}
+
+.delete-category-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.category-item:hover .delete-category-btn {
+    opacity: 1;
+}
+
+.category-name {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.category-name:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Ensure the delete button stays visible when editing */
+.category-item:hover .delete-category-btn,
+.category-item.editing .delete-category-btn {
+    opacity: 1;
+}

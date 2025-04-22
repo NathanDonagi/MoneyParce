@@ -1,25 +1,388 @@
-profile.html{% extends 'base.html' %}
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
 {% block content %}
 <header class="masthead bg-index text-white text-center py-4">
-  <div class="container d-flex align-items-center flex-column pt-2">
-    <h2>Profile</h2>
-    <p>Insert Text Here</p>
-  </div>
+    <!-- Load jQuery first -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Then load jQuery UI -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <link rel="stylesheet" href="{% static 'css/budgets.css' %}">
 </header>
-<div class="p-3">
+
+<!-- Page content wrapper -->
+<div id="page-content" class="p-3">
   <div class="container">
     <div class="row mt-3">
-      <div class="col mx-auto text-center mb-3">
-        <h4>Hi</h4>
-      </div>
-        <ul>
+
+      <!-- Budgets Column -->
+      <div class="col-md-8 text-center mb-3">
+        <h4>Budgets</h4>
+        <div class="text-center mb-4">
+          <h5>Total Spending</h5>
+          <div class="progress" style="height: 20px;">
+            {% with percentage=total_expense|divide:total_limit|multiply:100 %}
+            <div class="progress-bar
+              {% if percentage > 90 %}bg-danger
+              {% elif percentage > 70 %}bg-warning
+              {% else %}bg-success{% endif %}"
+              role="progressbar"
+              style="width: {{ percentage }}%"
+              aria-valuenow="{{ percentage }}"
+              aria-valuemin="0"
+              aria-valuemax="100">
+            </div>
+            {% endwith %}
+          </div>
+          <small>
+            ${{ total_expense|floatformat:2 }} of ${{ total_limit|floatformat:2 }}
+            ({{ total_expense|divide:total_limit|multiply:100|floatformat:0 }}%)
+          </small>
+        </div>
+
+        <!-- Sort Buttons -->
+        <div class="sort-buttons mb-3">
+          <button id="sort-category" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Category</button>
+          <button id="sort-limit" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Limit</button>
+          <button id="sort-expense" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Expense</button>
+          <button id="sort-progress" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Progress</button>
+        </div>
+
+        <ul class="list-unstyled" id="budget-list">
           {% for budget in user.budgets.all %}
-            <li>Category: {{budget.category}}, Limit: {{budget.limit}}, Expense: {{budget.expense}}</li>
+            {% with color=budget.category|get_dynamic_color %}
+              <li>
+                <div class="budget-box" style="background-color: {{ color }};">
+                  <div class="budget-content row w-100">
+                    <div class="col text-start">
+                      <div class="text-muted small">{{ budget.category.name }}</div>
+                      <strong>{{ budget.name }}</strong><br>
+                      <div class="progress mt-2">
+                        {% with percentage=budget.expense|divide:budget.limit|multiply:100 %}
+                        <div class="progress-bar
+                          {% if percentage > 90 %}bg-danger
+                          {% elif percentage > 70 %}bg-warning
+                          {% else %}bg-success{% endif %}"
+                          role="progressbar"
+                          style="width: {{ percentage }}%"
+                          aria-valuenow="{{ percentage }}"
+                          aria-valuemin="0"
+                          aria-valuemax="100">
+                        </div>
+                        {% endwith %}
+                      </div>
+                      <small>${{ budget.expense|floatformat:2 }} of ${{ budget.limit|floatformat:2 }} ({{ budget.expense|divide:budget.limit|multiply:100|floatformat:0 }}%)</small>
+                    </div>
+                    <div class="col-auto text-end">
+                      <button class="edit-btn btn btn-sm btn-warning mt-1" data-id="{{ budget.id }}">Edit</button>
+                      <form action="{% url 'finances.delete_budget' budget.id %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Delete this budget?');">
+                          Delete
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            {% endwith %}
           {% empty %}
             <li>No budgets found</li>
           {% endfor %}
         </ul>
+
+        <button id="show-popup" class="btn btn-primary mt-3">Create New Budget</button>
+      </div>
+
+      <!-- Categories Sidebar -->
+      <div class="col-md-4">
+        <div class="p-3 border rounded bg-light">
+          <h5>Available Categories</h5>
+          <ul class="list-group mb-3" id="category-list">
+            {% for category in categories %}
+              {% with color=category|get_dynamic_color %}
+                <li class="list-group-item category-item"
+                    style="background-color: {{ color }};"
+                    data-id="{{ category.id }}">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span class="category-name" data-id="{{ category.id }}">{{ category.name }}</span>
+                    <button class="delete-category-btn btn btn-sm btn-danger"
+                            data-id="{{ category.id }}"
+                            data-name="{{ category.name }}">
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              {% endwith %}
+            {% empty %}
+              <li class="list-group-item">No categories yet</li>
+            {% endfor %}
+          </ul>
+          <button id="add-category-btn" class="btn btn-secondary btn-sm">Add Category</button>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
+
+<!-- Popup overlay and modal -->
+<div id="popup-overlay"></div>
+<div id="popup-modal"></div>
+
+<script>
+    // Function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    $(document).ready(function() {
+        // Initialize sortable on category list
+        $("#category-list").sortable({
+            items: ".category-item",
+            cursor: "move",
+            opacity: 0.7,
+            placeholder: "ui-sortable-placeholder",
+            update: function(event, ui) {
+                // Get the new order of categories
+                const order = [];
+                $("#category-list .category-item").each(function() {
+                    order.push($(this).data('id'));
+                });
+
+                // Send to server to save
+                $.ajax({
+                    url: "{% url 'finances.reorder_categories' %}",
+                    type: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ order: order }),
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    success: function(response) {
+                        console.log("Order saved:", response);
+                        // If sorted by category, re-sort budgets
+                        if ($('#sort-category').hasClass('active')) {
+                            sortBudgets('category');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error saving order:", error);
+                    }
+                });
+            }
+        }).disableSelection();
+
+        function openModalWithContent(url) {
+            $.get(url, function(data) {
+                $('#popup-modal').html(data).fadeIn();
+                $('#popup-overlay').fadeIn();
+                $('body').addClass('modal-open');
+            });
+        }
+
+        // Modal event handlers
+        $('#show-popup').click(function() {
+            openModalWithContent("{% url 'finances.budgets_form' %}");
+        });
+
+        $('#add-category-btn').click(function() {
+            openModalWithContent("{% url 'finances.create_category' %}");
+        });
+
+        $('#popup-overlay').click(function() {
+            $('#popup-modal').fadeOut();
+            $('#popup-overlay').fadeOut();
+            $('body').removeClass('modal-open');
+        });
+
+        $(document).on('click', '.edit-btn', function() {
+            const budgetId = $(this).data('id');
+            openModalWithContent(`/finances/budgets/edit/${budgetId}/`);
+        });
+
+        $(document).on('click', '.delete-category-btn', function() {
+            const categoryId = $(this).data('id');
+            const categoryName = $(this).data('name');
+
+            if (confirm(`Are you sure you want to delete the category "${categoryName}"?`)) {
+                $.ajax({
+                    url: `/finances/categories/delete/${categoryId}/`,
+                    type: "DELETE",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Remove the category from the UI
+                            $(`.category-item[data-id="${categoryId}"]`).remove();
+                            // Reload budgets if sorted by category
+                            if ($('#sort-category').hasClass('active')) {
+                                sortBudgets('category');
+                            }
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            alert(response.message || "Error deleting category");
+                        } catch {
+                            alert("Error deleting category");
+                        }
+                    }
+                });
+            }
+        });
+
+        $(document).on('click', '.category-name', function() {
+            // Don't start editing if we're already editing
+            if ($(this).closest('.category-item').hasClass('editing')) return;
+
+            const categoryId = $(this).data('id');
+            const currentName = $(this).text().trim();
+            const $categoryItem = $(this).closest('.category-item');
+            const $span = $(this);
+
+            // Set editing state
+            $categoryItem.addClass('editing');
+
+            // Create input field
+            const $input = $('<input type="text">')
+                .val(currentName)
+                .addClass('form-control form-control-sm category-edit-input')
+                .css({
+                    'display': 'inline-block',
+                    'width': 'auto'
+                });
+
+            $span.replaceWith($input);
+            $input.focus();
+
+            function completeEdit() {
+                const newName = $input.val().trim();
+
+                if (newName && newName !== currentName) {
+                    $.ajax({
+                        url: `/finances/categories/rename/${categoryId}/`,
+                        type: "POST",
+                        data: {
+                            'new_name': newName,
+                            'csrfmiddlewaretoken': getCookie("csrftoken")
+                        },
+                        success: function(response) {
+                            $categoryItem.removeClass('editing');
+                            if (response.success) {
+                                const $newSpan = $('<span class="category-name">')
+                                    .text(newName)
+                                    .data('id', categoryId);
+                                $input.replaceWith($newSpan);
+
+                                // Update budgets
+                                $(`.budget-box .text-muted.small:contains('${currentName}')`)
+                                    .text(newName);
+                            } else {
+                                alert(response.message);
+                                $input.replaceWith($span.text(currentName));
+                            }
+                        },
+                        error: function() {
+                            $categoryItem.removeClass('editing');
+                            alert("Error updating category name");
+                            $input.replaceWith($span.text(currentName));
+                        }
+                    });
+                } else {
+                    $categoryItem.removeClass('editing');
+                    $input.replaceWith($span.text(currentName));
+                }
+            }
+
+            $input.on('keyup', function(e) {
+                if (e.key === 'Enter') completeEdit();
+                if (e.key === 'Escape') {
+                    $categoryItem.removeClass('editing');
+                    $input.replaceWith($span.text(currentName));
+                }
+            }).on('blur', completeEdit);
+        });
+
+        // Sorting functionality
+        function sortBudgets(type) {
+            let budgets = $('#budget-list li').get();
+
+            budgets.sort(function(a, b) {
+                let valA, valB;
+
+                if (type === 'category') {
+                    const categoryOrder = [];
+                    $("#category-list .category-item").each(function() {
+                        categoryOrder.push($(this).find('span').first().text().trim()); // Changed to find the span text
+                    });
+
+                    valA = $(a).find('.text-muted:first').text().trim();
+                    valB = $(b).find('.text-muted:first').text().trim();
+
+                    return categoryOrder.indexOf(valA) - categoryOrder.indexOf(valB);
+                }
+                else if (type === 'limit') {
+                    valA = parseFloat($(a).find('small').first().text().split(' of ')[1].replace('$', ''));
+                    valB = parseFloat($(b).find('small').first().text().split(' of ')[1].replace('$', ''));
+                    return valB - valA;
+                }
+                else if (type === 'expense') {
+                    valA = parseFloat($(a).find('small').first().text().split(' of ')[0].replace('$', ''));
+                    valB = parseFloat($(b).find('small').first().text().split(' of ')[0].replace('$', ''));
+                    return valB - valA;
+                }
+                else if (type === 'progress') {
+                    valA = parseFloat($(a).find('small').first().text().split('(')[1].replace('%)', ''));
+                    valB = parseFloat($(b).find('small').first().text().split('(')[1].replace('%)', ''));
+                    return valB - valA;
+                }
+            });
+
+            // Update the DOM
+            $('#budget-list').empty().append(budgets);
+        }
+
+        // Sort button event handlers
+        $('.sort-btn').click(function() {
+            $('.sort-btn').removeClass('active');
+            $(this).addClass('active');
+            const sortType = $(this).attr('id').split('-')[1];
+            localStorage.setItem('lastBudgetSortType', sortType);
+            sortBudgets(sortType);
+        });
+
+        // Apply saved sort preference on page load
+        const savedSortType = localStorage.getItem('lastBudgetSortType');
+        if (savedSortType) {
+            $(`.sort-btn`).removeClass('active');
+            $(`#sort-${savedSortType}`).addClass('active');
+            sortBudgets(savedSortType);
+        } else {
+            // Default to category sort if no preference exists
+            if ($('.sort-btn.active').length === 0) {
+                $('#sort-category').addClass('active');
+            }
+        }
+    });
+</script>
+
 {% endblock content %}
