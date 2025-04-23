@@ -14,5 +14,5 @@ urlpatterns = [
     path('transactions/form', views.transactions_form, name='finances.transactions_form'),
     path('transactions/delete/<uuid:transaction_id>/', views.delete_transaction, name='finances.delete_transaction'),
     path('transactions/edit/<uuid:transaction_id>/', views.edit_transaction, name='finances.edit_transaction'),
-    path('reports/', views.reports, name='finances.reports'),
+    path('progress/', views.progress, name='finances.progress'),
 ]

@@ -5,8 +5,6 @@ from django.db.models import Max, Sum  # Import Max
 from django.template.context_processors import request
 from django.views.decorators.http import require_POST, require_http_methods  # Import require_POST
 from django.http import JsonResponse, HttpResponseRedirect  # Import JsonResponse
-from django.utils import timezone
-from datetime import timedelta
 
 
 from .models import Budget, Transaction, Category
@@ -283,71 +281,7 @@ def edit_transaction(request, transaction_id):
                   {'template_data': template_data, 'transaction': transaction})
 
 @login_required(login_url='login')
-def reports(request):
-    """View for displaying financial reports and visualizations."""
-    # Get date range for filtering
-    end_date = timezone.now().date()
-    start_date = end_date - timedelta(days=30)  # Last 30 days by default
-    
-    # Get transactions for the period
-    transactions = Transaction.objects.filter(
-        user=request.user,
-        date__range=[start_date, end_date]
-    )
-    
-    # Calculate total income and expenses
-    total_income = transactions.filter(isExpense=False).aggregate(Sum('amount'))['amount__sum'] or 0
-    total_expenses = transactions.filter(isExpense=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    
-    # Get category-wise expenses
-    category_expenses = {}
-    for category in Category.objects.filter(user=request.user):
-        amount = transactions.filter(category=category, isExpense=True).aggregate(Sum('amount'))['amount__sum'] or 0
-        if amount > 0:
-            category_expenses[category.name] = amount
-    
-    # Get weekly spending data
-    weekly_spending = {}
-    current_date = start_date
-    while current_date <= end_date:
-        # Calculate the start of the week (Monday)
-        week_start = current_date - timedelta(days=current_date.weekday())
-        week_end = week_start + timedelta(days=6)
-        
-        # Get the week's total spending
-        amount = transactions.filter(
-            date__range=[week_start, week_end],
-            isExpense=True
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
-        
-        # Use the week start date as the key
-        week_key = week_start.strftime('%Y-%m-%d')
-        weekly_spending[week_key] = amount
-        
-        # Move to next week
-        current_date = week_end + timedelta(days=1)
-    
-    # Get monthly spending data
-    monthly_spending = {}
-    current_date = start_date
-    while current_date <= end_date:
-        month_key = current_date.strftime('%Y-%m')
-        amount = transactions.filter(
-            date__year=current_date.year,
-            date__month=current_date.month,
-            isExpense=True
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
-        monthly_spending[month_key] = amount
-        current_date += timedelta(days=32)  # Move to next month
-    
-    context = {
-        'template_data': {'title': 'Financial Reports'},
-        'total_income': total_income,
-        'total_expenses': total_expenses,
-        'net_balance': total_income - total_expenses,
-        'category_expenses': category_expenses,
-        'weekly_spending': json.dumps(weekly_spending),
-        'monthly_spending': json.dumps(monthly_spending),
-    }
-    
-    return render(request, 'finances/reports.html', context)
+def progress(request):
+    template_data = {'title': 'Progress'}
+    return render(request, 'finances/progress.html', {
+        'template_data': template_data})
