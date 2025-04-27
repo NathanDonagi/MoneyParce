@@ -1,39 +1,80 @@
-import json # Add json import
+import json
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import transaction # Import transaction
-from django.db.models import Max, Sum  # Import Max
-from django.template.context_processors import request
-from django.views.decorators.http import require_POST, require_http_methods  # Import require_POST
-from django.http import JsonResponse, HttpResponseRedirect  # Import JsonResponse
-
-
+from django.db import transaction
+from django.views.decorators.http import require_POST, require_http_methods
+from django.http import JsonResponse, HttpResponseRedirect
 from .models import Budget, Transaction, Category
 from .forms import BudgetForm, TransactionForm, CustomErrorList, CategoryForm
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.db.models import Sum
+from .models import Budget
+from .deepSeak import generate_advice
+from django.utils import timezone
+from datetime import timedelta
 
 
 @login_required(login_url='login')
 def profile(request):
     user = request.user
     template_data = {'title': 'Profile'}
+
+    last_month = timezone.now() - timedelta(days=30)
     budgets = Budget.objects.filter(user=user)
+    transactions = Transaction.objects.filter(user=user, date__gte=last_month).order_by('-date')
+
     total_limit = budgets.aggregate(Sum('limit'))['limit__sum'] or 0
     total_expense = budgets.aggregate(Sum('expense'))['expense__sum'] or 0
+    remaining_budget = total_limit - total_expense
 
-    advice = [
-        "Make sure to track your expenses regularly to stay on top of your budget.",
-        "Consider setting up alerts when you're close to reaching your budget limits.",
-        "Review your spending habits monthly to avoid unnecessary expenses."
-    ]
+    advice = []
+    try:
+            prompt = f"""Analyze this financial profile for {user.email}:
+
+            Budget Overview:
+            - Total Budget: ${total_limit:.2f}
+            - Total Spent: ${total_expense:.2f}
+            - Remaining Budget: ${remaining_budget:.2f}
+
+            Individual Budgets:
+            {chr(10).join([f"- {b.name} ({b.category.name}): ${b.limit:.2f} limit, ${b.expense:.2f} spent" for b in budgets])}
+
+            Recent Transactions:
+            {chr(10).join([f"{t.date}: {t.name} - {t.category.name} - ${t.amount:.2f}" for t in transactions])}
+
+            Generate 5 clear financial recommendations as a plain text list with no extra formating. Focus on:
+            1. Specific spending reductions
+            2. Budget optimization strategies
+            3. Savings opportunities
+            4. Expense tracking improvements
+            5. Personalized advice based on transaction patterns
+
+            Format as:
+            1. First recommendation
+            2. Second recommendation
+            3. Third recommendation..."""
+
+            advice = generate_advice(prompt)
+
+    except Exception as e:
+        print(f"Deepseek error: {str(e)}")
+
+    if not advice:
+        advice = [
+            "Error could not generate advice, using Fallback advice."
+            "Track expenses regularly to stay within budget",
+            "Review recurring subscriptions for potential savings",
+            "Consider setting aside 20% of income for emergencies",
+            "Categorize expenses to identify spending patterns",
+            "Set up budgets to track your progress"
+        ]
 
     return render(request, 'finances/profile.html', {
         'template_data': template_data,
         'total_limit': total_limit,
         'total_expense': total_expense,
+        'remaining_budget': remaining_budget,
         'advice': advice,
     })
-
 
 @login_required
 def create_category(request):
@@ -281,7 +322,71 @@ def edit_transaction(request, transaction_id):
                   {'template_data': template_data, 'transaction': transaction})
 
 @login_required(login_url='login')
-def progress(request):
-    template_data = {'title': 'Progress'}
-    return render(request, 'finances/progress.html', {
-        'template_data': template_data})
+def reports(request):
+    """View for displaying financial reports and visualizations."""
+    # Get date range for filtering
+    end_date = timezone.now().date()
+    start_date = end_date - timedelta(days=30)  # Last 30 days by default
+    
+    # Get transactions for the period
+    transactions = Transaction.objects.filter(
+        user=request.user,
+        date__range=[start_date, end_date]
+    )
+    
+    # Calculate total income and expenses
+    total_income = transactions.filter(isExpense=False).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expenses = transactions.filter(isExpense=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    
+    # Get category-wise expenses
+    category_expenses = {}
+    for category in Category.objects.filter(user=request.user):
+        amount = transactions.filter(category=category, isExpense=True).aggregate(Sum('amount'))['amount__sum'] or 0
+        if amount > 0:
+            category_expenses[category.name] = amount
+    
+    # Get weekly spending data
+    weekly_spending = {}
+    current_date = start_date
+    while current_date <= end_date:
+        # Calculate the start of the week (Monday)
+        week_start = current_date - timedelta(days=current_date.weekday())
+        week_end = week_start + timedelta(days=6)
+        
+        # Get the week's total spending
+        amount = transactions.filter(
+            date__range=[week_start, week_end],
+            isExpense=True
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+        
+        # Use the week start date as the key
+        week_key = week_start.strftime('%Y-%m-%d')
+        weekly_spending[week_key] = amount
+        
+        # Move to next week
+        current_date = week_end + timedelta(days=1)
+    
+    # Get monthly spending data
+    monthly_spending = {}
+    current_date = start_date
+    while current_date <= end_date:
+        month_key = current_date.strftime('%Y-%m')
+        amount = transactions.filter(
+            date__year=current_date.year,
+            date__month=current_date.month,
+            isExpense=True
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+        monthly_spending[month_key] = amount
+        current_date += timedelta(days=32)  # Move to next month
+    
+    context = {
+        'template_data': {'title': 'Financial Reports'},
+        'total_income': total_income,
+        'total_expenses': total_expenses,
+        'net_balance': total_income - total_expenses,
+        'category_expenses': category_expenses,
+        'weekly_spending': json.dumps(weekly_spending),
+        'monthly_spending': json.dumps(monthly_spending),
+    }
+    
+    return render(request, 'finances/reports.html', context)
