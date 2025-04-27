@@ -1,12 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 <div class="p-3 mt-4">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-md-8">
-        <div class="card shadow p-3 mb-4 rounded">
+      <div class="col-md-4">
+        <div class="card p-3 mb-4 rounded">
           <div class="card-body">
-            <h2>Sign Up</h2>
+            <h2 class="heading">Sign Up</h2>
+              <p class="paragraph">Access all the features here</p>
             <hr />
             <form method="POST">
               {% csrf_token %}

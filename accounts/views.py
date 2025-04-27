@@ -13,8 +13,8 @@ def login(request):
     template_data = {}
     template_data['title'] = 'Login'
     if request.method == 'GET':
-        return render(request, 'accounts/login.html',
-            {'template_data': template_data})
+        return render(request, 'login.html',
+                      {'template_data': template_data})
     elif request.method == 'POST':
         user = authenticate(
             request,
@@ -23,8 +23,8 @@ def login(request):
         )
         if user is None:
             template_data['error'] = 'The username or password is incorrect.'
-            return render(request, 'accounts/login.html',
-                {'template_data': template_data})
+            return render(request, 'login.html',
+                          {'template_data': template_data})
         else:
             auth_login(request, user)
             return redirect('home.index')
@@ -35,15 +35,15 @@ def signup(request):
     if request.method == 'GET':
         user_form = CustomUserCreationForm()
         template_data['userForm'] = user_form
-        return render(request, 'accounts/signup.html',
-            {'template_data': template_data})
+        return render(request, 'signup.html',
+                      {'template_data': template_data})
     elif request.method == 'POST':
         user_form = CustomUserCreationForm(request.POST, error_class=CustomErrorList)
 
         if user_form.is_valid():
             user_form.save()
-            return redirect('accounts.login')
+            return redirect('templates.login')
         else:
             template_data['userForm'] = user_form
-            return render(request, 'accounts/signup.html',
-                {'template_data': template_data})
+            return render(request, 'signup.html',
+                          {'template_data': template_data})

@@ -7,10 +7,10 @@
   <div class="container">
     <!-- Greeting and Summary Box -->
     <div class="row justify-content-center mb-4">
-      <div class="col-md-8">
-        <div class="card text-center shadow rounded-3">
+      <div class="col-md-6">
+        <div class="card text-center rounded-5 welcome-card">
           <div class="card-body">
-            <h4 class="card-title">Welcome, {{ user.first_name|default:user.username }}!</h4>
+            <h1 class="card-title">Welcome, {{ user.first_name|default:user.username }}!</h1>
             <p class="card-text">
               <strong>Total Budget:</strong> ${{ total_limit|floatformat:2 }}<br>
               <strong>Total Spent:</strong> ${{ total_expense|floatformat:2 }}
@@ -22,8 +22,8 @@
 
     <!-- Advice Box -->
     <div class="row justify-content-center mb-4">
-      <div class="col-md-8">
-        <div class="card text-center shadow rounded-3">
+      <div class="col-md-6">
+        <div class="card text-center shadow rounded-5 advice-card">
           <div class="card-body">
             <h5 class="card-title">Budgeting Advice</h5>
             <ul class="list-unstyled">
