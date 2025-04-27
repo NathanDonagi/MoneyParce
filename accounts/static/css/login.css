@@ -1,0 +1,45 @@
+.heading {
+    text-align: center;
+    color: #7e5eff;
+}
+.card {
+    background: linear-gradient(to bottom, #FFBE0A, #EC6200); /* Orange ombre */
+    color: white; /* Optional: make text white for contrast */
+    border: none; /* Optional: remove default card border */
+
+}
+.paragraph {
+    text-align: center;
+}
+.custom-login-btn {
+    background-color: #7e5eff;
+    color: white;
+    border: none;
+    width: 100px; /* Change if too large/small */
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: -50px;
+    text-align: center;
+}
+
+.custom-login-btn:hover {
+    background-color: #6a4edc;
+}
+
+.small {
+    text-align: right;
+    color: black;
+}
+.smallOther {
+    text-align: center;
+    color: black;
+    padding-top: 10px;
+    text-align: center;
+}
+
+.form-control {
+    width: 350px;
+    height: 60px;
+    border-radius: 15px;
+    padding-left: 20px;
+}
