@@ -19,11 +19,11 @@
     <div class="row mt-3">
 
       <!-- Budgets Column -->
-      <div class="col-md-8 text-center mb-3">
-        <h4>Budgets</h4>
-        <div class="text-center mb-4">
-          <h5>Total Spending</h5>
-          <div class="progress" style="height: 20px;">
+      <div class="col-md-8 text-center mb-2">
+        <h1 class = "left">Budgets</h1>
+        <div class=" spending_container text-center mb-4">
+          <h5 class>Total Spending</h5>
+          <div class="progress mx-auto" style="height: 20px; width: 80%; max-width: 1000px">
             {% with percentage=total_expense|divide:total_limit|multiply:100 %}
             <div class="progress-bar
               {% if percentage > 90 %}bg-danger
@@ -43,8 +43,9 @@
           </small>
         </div>
 
+        <button id="show-popup" class="btn btn-primary mt-3">Create New Budget</button>
         <!-- Sort Buttons -->
-        <div class="sort-buttons mb-3">
+        <div class="col-md-8 text-start mb-2">
           <button id="sort-category" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Category</button>
           <button id="sort-limit" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Limit</button>
           <button id="sort-expense" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Expense</button>
@@ -55,12 +56,12 @@
           {% for budget in user.budgets.all %}
             {% with color=budget.category|get_dynamic_color %}
               <li>
-                <div class="budget-box" style="background-color: {{ color }};">
+                <div class="budget-box" style="background-color: #FFA737; border-radius: 20px">
                   <div class="budget-content row w-100">
-                    <div class="col text-start">
+                    <div class="col text-start" style="color: white; padding-left: 30px">
                       <div class="text-muted small">{{ budget.category.name }}</div>
                       <strong>{{ budget.name }}</strong><br>
-                      <div class="progress mt-2">
+                      <div class="progress mt-2" style="height: 20px; width: 80%; max-width: 1000px">
                         {% with percentage=budget.expense|divide:budget.limit|multiply:100 %}
                         <div class="progress-bar
                           {% if percentage > 90 %}bg-danger
@@ -94,12 +95,12 @@
           {% endfor %}
         </ul>
 
-        <button id="show-popup" class="btn btn-primary mt-3">Create New Budget</button>
+
       </div>
 
       <!-- Categories Sidebar -->
       <div class="col-md-4">
-        <div class="p-3 border rounded bg-light">
+        <div class="p-3 border rounded bg-light" style="background-color: #FFA737">
           <h5>Available Categories</h5>
           <ul class="list-group mb-3" id="category-list">
             {% for category in categories %}

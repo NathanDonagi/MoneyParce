@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+<header class="masthead bg-index text-white text-center py-4">
+
+</header>
+<div class="p-3">
+  <div class="container">
+    <div class="row mt-3">
+      <div class="col mx-auto text-center mb-3">
+        <h1 class="title">What is MoneyParce?</h1>
+          <p class="paragraph">MoneyParce is a web application that allows users to manage their income and expenses,
+              set budgets, and view financial information. MoneyParce can provide personalized financial insights with
+              generated advice, a detailed financial report, and graphs displaying the user's financial data.
+          </p>
+          <p class="paragraph">Once a user creates and account and logs in, they have access to all MoneyParce features, including the abilities to
+          input expenses and income, create and manage budgets, categorize spending, view financial insights, and more!</p>
+          <p class="paragraph">Join MoneyParce today to manage all your financial needs!</p>
+          <h2 class="subheading">Your Money, Your Pace.</h2>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

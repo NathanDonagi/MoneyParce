@@ -1,4 +1,7 @@
 /* Existing styles */
+body {
+    font-family: 'Manrope', sans-serif;
+}
 .navbar a.nav-link {
   color: #FFFEF6 !important;
 }

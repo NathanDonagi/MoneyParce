@@ -1,0 +1,38 @@
+.advice-card {
+    background: #FFBE0A;
+    color: white; /* Optional: make text white for contrast */
+    border: none; /* Optional: remove default card border */
+
+}
+.welcome-card {
+    background-color: #7e5eff;
+    color: white;
+    border: none;
+}
+.card-title {
+    padding-bottom: 10px;
+}
+
+.card-text {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    padding: 0 20px; /* optional: space on the sides */
+    margin-top: 10px;
+}
+
+.aiCredit {
+    color: white;
+}
+.advice-card .alert-info {
+    background-color: #EC6200;
+    color: white;
+    border: none;
+    border-radius: 2rem;
+    padding: 0.75rem 1rem 0px 10px;
+    height: 50px;
+}
+
+.budget-line p:first-child {
+  margin-right: 60px; /*edit if needed */
+}
