@@ -1,6 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
-from django.forms import CharField, Form
+from django.forms import CharField, Form, PasswordInput
 from django.forms.utils import ErrorList
 from django.utils.safestring import mark_safe
 from .models import CustomUser
@@ -46,7 +46,7 @@ class CustomUserLogInForm(UserCreationForm):
 
 class ResetPasswordForm(Form):
     username = CharField(max_length=100)
-    password = CharField(max_length=100)
+    password = CharField(max_length=100, widget=PasswordInput())
     securityQuestion = CharField(max_length=100)
 
     def __init__(self, *args, **kwargs):
