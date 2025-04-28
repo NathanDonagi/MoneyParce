@@ -1,10 +1,38 @@
-<form method="POST" action="{% url 'finances.create_category' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="hidden" name="next" id="nextInput">
-    <button type="submit" class="btn btn-dark">Add Category</button>
-</form>
+{% block content %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/categories.css' %}"> <!-- Link to the external CSS file -->
 
-<script>
-    document.getElementById('nextInput').value = window.location.pathname;
-</script>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card p-3 mb-4 rounded" style="background-color: #FFA737;">
+                    <div class="card-body">
+                        <h2 style="color: white;">Create New Category</h2>
+                        <hr />
+
+                        <form method="POST" action="{% url 'finances.create_category' %}">
+                            {% csrf_token %}
+
+                            <!-- Category Name Field -->
+                            <div class="form-group">
+                                <label for="name">Category Name</label>
+                                {{ form.name }} <!-- Render the category name field -->
+                            </div>
+
+                            <!-- Hidden Input for Redirecting -->
+                            <input type="hidden" name="next" id="nextInput">
+
+                            <!-- Submit Button with Shrunk Width -->
+                            <button type="submit" class="btn">Add Category</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to set the nextInput field to the current page URL -->
+    <script>
+        document.getElementById('nextInput').value = window.location.pathname;
+    </script>
+{% endblock content %}

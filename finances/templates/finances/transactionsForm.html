@@ -1,18 +1,18 @@
 {% block content %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/transactionsAdd.css' %}">
 <div class="p-3 mt-4">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-8">
-        <div class="card shadow p-3 mb-4 rounded">
+        <div class="card shadow p-3 mb-4 rounded" style="background-color: #FFA737;"> <!-- Light Orange background -->
           <div class="card-body">
-            <h2>Enter Transaction</h2>
+            <h2 style="color: white;">Enter Transaction</h2>
             <hr />
             <form action="{% url 'finances.transactions_form' %}" method="POST">
               {% csrf_token %}
               {{ template_data.form.as_p }}
-              <button type="submit"
-                class="btn bg-dark text-white">Submit
-              </button>
+              <button type="submit" class="btn bg-#7E5BEF text-white">Submit</button> <!-- Purple button -->
             </form>
           </div>
         </div>

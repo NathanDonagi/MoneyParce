@@ -1,0 +1,48 @@
+input, select, textarea {
+    border-radius: 15px; /* Round the input and select fields */
+    border: 2px solid #FFA737; /* Orange outline */
+    padding: 10px;
+    font-size: 16px;
+    width: 100%; /* Make input fields full width */
+    box-sizing: border-box;
+}
+
+/* Label styling */
+label {
+    font-weight: bold;
+    color: #D45A00; /* Dark Orange */
+    font-family: 'Arial', sans-serif;
+}
+
+button[type="submit"] {
+    background-color: #7E5BEF;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    max-width: 200px; /* Adjust the max width of the button */
+    margin: 0 auto; /* Center the button horizontally */
+    display: block; /* Make the button a block element for centering */
+}
+
+button[type="submit"]:hover {
+    background-color: #5E548E;
+}
+
+/* Form group styling */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Input field styling for rounded corners */
+input[type="text"], input[type="number"], textarea, select {
+    border-radius: 15px; /* Round the input and select fields */
+    border: 2px solid #FFA737; /* Orange outline */
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}

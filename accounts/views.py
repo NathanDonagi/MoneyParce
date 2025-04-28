@@ -42,7 +42,7 @@ def signup(request):
 
         if user_form.is_valid():
             user_form.save()
-            return redirect('templates.login')
+            return redirect('accounts.login')
         else:
             template_data['userForm'] = user_form
             return render(request, 'signup.html',

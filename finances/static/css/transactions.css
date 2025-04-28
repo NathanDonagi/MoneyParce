@@ -7,22 +7,20 @@ li {
     margin-bottom: 10px;
 }
 
-/* Remove static expense/income colors — replaced by dynamic category colors */
-.expense {
-    background-color: #ffdddd;
-}
-
-.income {
-    background-color: #ddffdd;
-}
 
 .transaction-box {
     padding: 10px 10px 10px 0;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     display: flex;
+    flex-direction: column; /* Stack content vertically */
     position: relative;
     overflow: hidden;
+    background-color: #EC6200;
+    color: white;
+}
+
+.transaction-box * {
+    color: white !important;
 }
 
 .transaction-strip {
@@ -30,38 +28,106 @@ li {
     border-radius: 5px 0 0 5px;
 }
 
-.income-strip {
-    background-color: green;
-}
 
-.expense-strip {
-    background-color: red;
-}
 
 .transaction-content {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-grow: 1;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
     padding-left: 10px;
+}
+.transaction-content .top-row {
+    display: flex;
+    justify-content: space-between; /* Align transaction name and amount on the same line */
+    width: 100%;
+    font-style: normal;
+}
+
+.transaction-content .transaction-name {
+    font-size: 25px; /* Larger text for transaction name */
+    margin-right: 15px; /* Add some space below the name */
+    text-align: left;
+    padding-left: 20px;
+}
+
+.transaction-content .amount {
+    font-size: 25px; /* Larger text for amount */
+    color: white;
+    text-align: right; /* Right-align the amount */
+    padding-right: 200px;
+    flex-grow: 1;
+}
+
+.transaction-content .bottom-row {
+    display: flex;
+    justify-content: space-between; /* Align category and date on the same line */
+    width: 100%;
+    text-align: left;
+    padding-left: 10px;
+}
+
+.transaction-content .category-name {
+    font-size: 15px; /* Smaller text for category */
+    color: #E9DCC9; /* Lighter color for category */
+    padding-left: 15px;
+}
+
+.transaction-content .date {
+    font-size: 15px; /* Smaller text for date */
+    color: #D1C8A1; /* Lighter color for date */
+    text-align: right; /* Right-align the date */
+    padding-right: 200px;
+    width: 40%;
+}
+
+.transaction-content .description {
+    font-size: 15px;
+    color: #D1C8A1;
+    margin-top: 5px; /* Space between the description and the other rows */
+    padding-left: 25px;
+    font-style: normal;
 }
 
 .transaction-content form {
     margin: 0;
 }
 
-.transaction-content button {
-    background-color: #e74c3c;
+
+.transaction-content .buttons {
+    display: flex;
+    justify-content: flex-end; /* Align the buttons to the right */
+    gap: 10px; /* Add space between the buttons */
+    align-items: center;
+    margin-top: 5px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+}
+
+.transaction-content .buttons button {
+    background-color: transparent;
     color: white;
     border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 0;
+    font-size: 18px;
     cursor: pointer;
 }
 
-.transaction-content button:hover {
-    background-color: #c0392b;
+.transaction-content .buttons button:hover {
+    background-color: transparent;
+    color: #E9DCC9;
 }
+
+.transaction-content .buttons button:focus {
+    outline: none;
+}
+
+.transaction-content .buttons i {
+    font-size: 20px; /* Adjust icon size */
+}
+
+
 
 /* Optional style for the empty message */
 li:only-child {
@@ -102,7 +168,7 @@ body.modal-open #page-content {
 
 /* Sort button highlighting */
 .sort-btn.active {
-  background-color: #0d6efd;
+  background-color: #FFA737;
   color: white;
 }
 

@@ -11,6 +11,8 @@
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
     <link rel="stylesheet" href="{% static 'css/transactions.css' %}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </header>
 
 <!-- Page content wrapper -->
@@ -19,9 +21,14 @@
     <div class="row mt-3">
 
       <!-- Transactions Column -->
-      <div class="col-md-8 text-center mb-3">
-        <h4>Transactions</h4>
+      <div class="col-md-8 text-start mb-3">
+        <h4 class="text-start">Transactions</h4>
 
+        <div class="add-transaction-container">
+            <button class="add-transaction-btn">
+                <span class="plus-icon">+</span> Add Transaction
+            </button>
+        </div>
         <!-- Sort Buttons -->
         <div class="sort-buttons mb-3">
           <button id="sort-date" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Date</button>
@@ -30,67 +37,86 @@
         </div>
 
         <ul class="list-unstyled" id="transaction-list">
-          {% for transaction in user.transactions.all %}
-            {% with color=transaction.category|get_dynamic_color %}
-              <li>
-                <div class="{% if transaction.isExpense %}expense{% else %}income{% endif %} transaction-box" style="background-color: {{ color }};">
-                  <div class="transaction-strip {% if transaction.isExpense %}expense-strip{% else %}income-strip{% endif %}"></div>
+            {% for transaction in user.transactions.all %}
+                {% with color=transaction.category|get_dynamic_color %}
+                    <li>
+                        <div class="transaction-box">
+                            <div class="transaction-strip"></div>
+                            <div class="transaction-content">
+                                <!-- Top Row: Transaction Name and Amount -->
+                                <div class="top-row">
+                                    <div class="transaction-name">{{ transaction.name }}</div>
+                                    <div class="amount">
+                                        {% if transaction.isExpense %}
+                                            -${{ transaction.amount|floatformat:2 }}
+                                        {% else %}
+                                            +${{ transaction.amount|floatformat:2 }}
+                                        {% endif %}
+                                    </div>
+                                </div>
 
-                  <div class="transaction-content row w-100">
-                      <div class="col text-start">
-                        <div class="text-muted small">{{ transaction.category.name }}</div>
-                        <strong>{{ transaction.name }}</strong><br>
-                        {{ transaction.description }} - ${{ transaction.amount|floatformat:2 }}
-                      </div>
-                      <div class="col-auto text-end">
-                        <div class="text-muted small">{{ transaction.date|date:"M d, Y" }}</div>
-                        <button class="edit-btn btn btn-sm btn-warning mt-1" data-id="{{ transaction.id }}">Edit</button>
-                        <form action="{% url 'finances.delete_transaction' transaction.id %}" method="post" class="d-inline">
-                          {% csrf_token %}
-                          <button type="submit" class="btn btn-sm btn-danger mt-1" onclick="return confirm('Delete this transaction?');">
-                            Delete
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                </div>
-              </li>
-            {% endwith %}
-          {% empty %}
-            <li>No transactions found</li>
-          {% endfor %}
+                                <!-- Bottom Row: Category Name and Date -->
+                                <div class="bottom-row">
+                                    <div class="category-name">{{ transaction.category.name }}</div>
+                                    <div class="date">{{ transaction.date|date:"M d, Y" }}</div>
+                                </div>
+
+                                <!-- Description below Category and Date -->
+                                <div class="description">{{ transaction.description }}</div>
+
+                                <!-- Buttons (Edit/Delete) -->
+                                <div class="buttons">
+                                    <button class="edit-btn" data-id="{{ transaction.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form action="{% url 'finances.delete_transaction' transaction.id %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-btn" onclick="return confirm('Delete this transaction?');">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                {% endwith %}
+            {% empty %}
+                <li>No transactions found</li>
+            {% endfor %}
         </ul>
 
-        <button id="show-popup" class="btn btn-primary mt-3">Enter New Transaction</button>
+
       </div>
 
       <!-- Categories Sidebar -->
       <div class="col-md-4">
-        <div class="p-3 border rounded bg-light">
-          <h5>Current Categories</h5>
-          <ul class="list-group mb-3" id="category-list">
-            {% for category in categories %}
-              {% with color=category|get_dynamic_color %}
-                <li class="list-group-item category-item"
-                    style="background-color: {{ color }};"
-                    data-id="{{ category.id }}">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <span class="category-name" data-id="{{ category.id }}">{{ category.name }}</span>
-                    <button class="delete-category-btn btn btn-sm btn-danger"
-                            data-id="{{ category.id }}"
-                            data-name="{{ category.name }}">
-                      Delete
-                    </button>
-                  </div>
-                </li>
-              {% endwith %}
-            {% empty %}
-              <li class="list-group-item">No categories yet</li>
-            {% endfor %}
-          </ul>
-          <button id="add-category-btn" class="btn btn-secondary btn-sm">Add Category</button>
+        <div class="category-box">
+            <h5 class="category-title">Current Categories</h5>
+            <ul class="list-group mb-3" id="category-list">
+                {% for category in categories %}
+                    {% with color=category|get_dynamic_color %}
+                        <li class="list-group-item category-item"
+                            style="background-color: {{ color }};"
+                            data-id="{{ category.id }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="category-name" data-id="{{ category.id }}">{{ category.name }}</span>
+                                <button class="delete-category-btn btn btn-sm btn-danger"
+                                        data-id="{{ category.id }}"
+                                        data-name="{{ category.name }}">
+                                    Delete
+                                </button>
+                            </div>
+                        </li>
+                    {% endwith %}
+                {% empty %}
+                    <li class="list-group-item">No categories yet</li>
+                {% endfor %}
+            </ul>
+            <button id="add-category-btn" class="add-category-btn">
+                <span class="plus-icon">+</span> Add Category
+            </button>
         </div>
-      </div>
+    </div>
 
     </div>
   </div>
@@ -163,7 +189,7 @@
         }
 
         // Modal event handlers
-        $('#show-popup').click(function() {
+        $('.add-transaction-btn').click(function() {
             openModalWithContent("{% url 'finances.transactions_form' %}");
         });
 
@@ -297,26 +323,31 @@
                 let valA, valB;
 
                 if (type === 'date') {
-                    valA = new Date($(a).find('.text-muted:last').text().trim());
-                    valB = new Date($(b).find('.text-muted:last').text().trim());
-                    return valB - valA;
+                valA = new Date($(a).find('.date').text().trim());
+                valB = new Date($(b).find('.date').text().trim());
+                return valB - valA;  // Sort by date in descending order
                 }
+
                 else if (type === 'amount') {
-                    valA = parseFloat($(a).find('.transaction-content div:first-child').text().split('$')[1]);
-                    valB = parseFloat($(b).find('.transaction-content div:first-child').text().split('$')[1]);
-                    return valB - valA;
+                // Extract the text content (the amount), remove the dollar sign and spaces, and parse as a float
+                valA = parseFloat($(a).find('.transaction-content div:first-child').text().replace(/[^0-9.-]+/g, '').trim());
+                valB = parseFloat($(b).find('.transaction-content div:first-child').text().replace(/[^0-9.-]+/g, '').trim());
+                // Ensure proper number comparison (e.g., descending order)
+                return valB - valA;
                 }
+
                 else if (type === 'category') {
-                    // Get category order from sidebar
-                    const categoryOrder = [];
-                    $("#category-list .category-item").each(function() {
-                        categoryOrder.push($(this).find('span').first().text().trim()); // Changed to find the span text
-                    });
+                // Get category order from sidebar
+                const categoryOrder = [];
+                $("#category-list .category-item").each(function() {
+                    categoryOrder.push($(this).find('.category-name').text().trim()); // Make sure to use the correct class
+                });
 
-                    valA = $(a).find('.text-muted:first').text().trim();
-                    valB = $(b).find('.text-muted:first').text().trim();
+                // Ensure you're finding the correct category in the transaction item
+                valA = $(a).find('.category-name').text().trim();
+                valB = $(b).find('.category-name').text().trim();
 
-                    return categoryOrder.indexOf(valA) - categoryOrder.indexOf(valB);
+                return categoryOrder.indexOf(valA) - categoryOrder.indexOf(valB);
                 }
             });
 

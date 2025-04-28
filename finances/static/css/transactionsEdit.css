@@ -1,0 +1,112 @@
+.card {
+    background-color: #FFA737; /* Light Orange background */
+    border: none;
+    border-radius: 20px;
+    padding: 20px;
+    margin: 20px auto;
+    width: 100%;
+}
+
+
+.card-body {
+    padding: 20px;
+}
+
+
+/* Heading for the page */
+h2 {
+    color: white; /* Dark orange for contrast */
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+label {
+    font-size: 16px;
+    color: #EC6200; /* Light orange color for labels */
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+    padding-left: 12px;
+}
+
+
+
+input, select, textarea {
+    width: 100%; /* Make input fields span the entire container width */
+    padding: 12px;
+    border-radius: 12px; /* Rounded corners for the inputs */
+    border: 1px solid #EC6200; /* Light orange border */
+    margin-bottom: 15px;
+    font-size: 16px;
+    background-color: #FFF3E0; /* Light background for inputs */
+    position: relative;
+    z-index: 1;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #EC6200; /* Darker orange border on focus */
+    outline: none;
+}
+
+input::placeholder, select::placeholder, textarea::placeholder {
+    color: #EC6200; /* Light orange color for the placeholder */
+    font-size: 16px;
+    font-weight: bold;
+    opacity: 0.7; /* Make the placeholder text slightly transparent */
+}
+input:focus::placeholder, select:focus::placeholder, textarea:focus::placeholder {
+    color: #EC6200; /* Darker orange color when the input is focused */
+    opacity: 1; /* Make placeholder text more visible when focused */
+}
+
+button[type="submit"] {
+    background-color: #7E5BEF;
+    color: white;
+    padding: 12px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    max-width: 200px; /* Adjust the max width of the button */
+    margin: 0 auto; /* Center the button horizontally */
+    display: block; /* Make the button a block element for centering */
+}
+
+button[type="submit"]:hover {
+    background-color: #5E548E;
+}
+
+/* Add spacing around the form */
+form {
+    margin-top: 30px;
+}
+
+/* Separator line */
+hr {
+    border: 1px solid #EC6200; /* Orange line for separator */
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    /* Adjust card padding on smaller screens */
+    .card {
+        padding: 15px;
+        margin: 10px;
+    }
+
+    /* Make the button full width on smaller screens */
+    button[type="submit"] {
+        width: 100%;
+    }
+}
+
+.transaction-edit-form {
+    background-color: #FFA737; /* Light Orange background for edit form */
+    color: white; /* Text color for readability */
+}
+
+.transaction-edit-form .card {
+    background-color: #FFA737; /* Ensure only the edit form has the orange background */
+}
