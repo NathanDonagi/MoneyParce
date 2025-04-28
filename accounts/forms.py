@@ -19,9 +19,11 @@ class CustomUserCreationForm(UserCreationForm):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
         for field_name in ['username', 'email', 'password1', 'password2']:
             self.fields[field_name].help_text = None
+            self.fields[field_name].label = ''  # 🔹 Hide label text
             self.fields[field_name].widget.attrs.update(
-                {'class': 'form-control'}
-            )
+                {'class': 'form-control',
+                    'placeholder': field_name.capitalize().replace('1', '').replace('2', ' confirmation')
+                 })
 
 class CustomUserLogInForm(UserCreationForm):
     class Meta:

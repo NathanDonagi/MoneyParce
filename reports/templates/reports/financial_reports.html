@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+    <link rel="stylesheet" href="{% static 'css/reports.css' %}">
+
+{% block title %}Financial Reports{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Financial Reports</h1>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Income</h5>
+                    <p class="card-text text-success">${{ total_income|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Expenses</h5>
+                    <p class="card-text text-danger">${{ total_expenses|floatformat:2 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Net Balance</h5>
+                    <p class="card-text {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        ${{ net_balance|floatformat:2 }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Expense Distribution</h5>
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Income vs Expenses</h5>
+                    <canvas id="incomeExpenseChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Parse the chart data from the context
+    const chartData = {{ chart_data|safe }};
+    
+    // Expense Distribution Chart
+    new Chart(document.getElementById('expenseChart'), {
+        type: 'pie',
+        data: {
+            labels: chartData.categories,
+            datasets: [{
+                data: chartData.expenses,
+                backgroundColor: [
+                    '#FF6384',
+                    '#36A2EB',
+                    '#FFCE56',
+                    '#4BC0C0',
+                    '#9966FF',
+                    '#FF9F40'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+
+    // Income vs Expenses Chart
+    new Chart(document.getElementById('incomeExpenseChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Income', 'Expenses'],
+            datasets: [{
+                data: [chartData.total_income, chartData.total_expenses],
+                backgroundColor: ['#4BC0C0', '#FF6384']
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

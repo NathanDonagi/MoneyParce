@@ -1,7 +1,7 @@
 .budget-box {
+    box-shadow: none !important;
     padding: 15px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 15px;
     position: relative;
     overflow: hidden;
@@ -12,14 +12,28 @@
     justify-content: space-between;
     align-items: center;
 }
+.btn-orange {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px; /* optional: makes it a little rounded */
+  cursor: pointer; /* makes cursor a hand on hover */
+}
+
 
 .progress {
     height: 10px;
-    background-color: #e9ecef;
+    background-color: #FFA737;
     border-radius: 5px;
     margin-bottom: 5px;
+    text-align: left;
 }
 
+.left {
+    text-align: left;
+}
 .progress-bar {
     transition: width 0.6s ease;
 }
@@ -58,6 +72,29 @@ body.modal-open #page-content {
 }
 
 .sort-btn.active {
-  background-color: #0d6efd;
+  background-color: #da560e;
   color: white;
+}
+
+h5 {
+    color: white;
+}
+
+.spending_container {
+    background-color: #7366FF; /* light gray */
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+.card {
+    background: linear-gradient(to bottom, #FFBE0A, #EC6200); /* Orange ombre */
+    color: white; /* Optional: make text white for contrast */
+    border: none; /* Optional: remove default card border */
+
 }

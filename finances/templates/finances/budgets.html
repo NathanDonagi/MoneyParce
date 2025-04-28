@@ -3,6 +3,10 @@
 {% load custom_filters %}
 
 {% block content %}
+
+<!-- Link to your custom CSS file -->
+<link rel="stylesheet" href="{% static 'css/budgets.css' %}">
+
 <header class="masthead bg-index text-white text-center py-4">
     <!-- Load jQuery first -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -10,7 +14,7 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
-    <link rel="stylesheet" href="{% static 'css/budgets.css' %}">
+
 </header>
 
 <!-- Page content wrapper -->
@@ -19,11 +23,19 @@
     <div class="row mt-3">
 
       <!-- Budgets Column -->
-      <div class="col-md-8 text-center mb-3">
-        <h4>Budgets</h4>
-        <div class="text-center mb-4">
+      <div class="col-md-8 text-center mb-2">
+        <h1 class = "left">Budgets</h1>
+        <div class="text-center mb-4" style ="background-color: #7366FF; /* light gray */
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: left;">
           <h5>Total Spending</h5>
-          <div class="progress" style="height: 20px;">
+          <div class="progress mx-auto" style="height: 20px; width: 80%; max-width: 1000px">
             {% with percentage=total_expense|divide:total_limit|multiply:100 %}
             <div class="progress-bar
               {% if percentage > 90 %}bg-danger
@@ -43,24 +55,34 @@
           </small>
         </div>
 
+        <button id="show-popup" class="btn-orange mb-3" style=" background-color: orange;
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          font-size: 16px;
+          border-radius: 5px;
+          cursor: pointer;">Create New Budget</button>
         <!-- Sort Buttons -->
-        <div class="sort-buttons mb-3">
+        <div class="col-md-8 text-start mb-3">
           <button id="sort-category" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Category</button>
           <button id="sort-limit" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Limit</button>
           <button id="sort-expense" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Expense</button>
           <button id="sort-progress" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Progress</button>
+
         </div>
+
+
 
         <ul class="list-unstyled" id="budget-list">
           {% for budget in user.budgets.all %}
             {% with color=budget.category|get_dynamic_color %}
               <li>
-                <div class="budget-box" style="background-color: {{ color }};">
+                <div class="budget-box" style="background-color: #FFA737; border-radius: 20px">
                   <div class="budget-content row w-100">
-                    <div class="col text-start">
+                    <div class="col text-start" style="color: white; padding-left: 30px">
                       <div class="text-muted small">{{ budget.category.name }}</div>
                       <strong>{{ budget.name }}</strong><br>
-                      <div class="progress mt-2">
+                      <div class="progress mt-2" style="height: 20px; width: 80%; max-width: 1000px">
                         {% with percentage=budget.expense|divide:budget.limit|multiply:100 %}
                         <div class="progress-bar
                           {% if percentage > 90 %}bg-danger
@@ -94,22 +116,23 @@
           {% endfor %}
         </ul>
 
-        <button id="show-popup" class="btn btn-primary mt-3">Create New Budget</button>
+
       </div>
 
       <!-- Categories Sidebar -->
-      <div class="col-md-4">
-        <div class="p-3 border rounded bg-light">
-          <h5>Available Categories</h5>
+      <div class="col-md-4" >
+        <div class="p-3 border" style="background-color: #FFA737; border-radius: 15px;">
+          <h5 style="color: white">Available Categories</h5>
           <ul class="list-group mb-3" id="category-list">
             {% for category in categories %}
-              {% with color=category|get_dynamic_color %}
+              {% with color="#7366FF" %}
                 <li class="list-group-item category-item"
                     style="background-color: {{ color }};"
                     data-id="{{ category.id }}">
                   <div class="d-flex justify-content-between align-items-center">
-                    <span class="category-name" data-id="{{ category.id }}">{{ category.name }}</span>
+                    <span class="category-name" data-id="{{ category.id }}" style = "color: white">{{ category.name }}</span>
                     <button class="delete-category-btn btn btn-sm btn-danger"
+                    style = "border: none;"
                             data-id="{{ category.id }}"
                             data-name="{{ category.name }}">
                       Delete
@@ -121,7 +144,9 @@
               <li class="list-group-item">No categories yet</li>
             {% endfor %}
           </ul>
-          <button id="add-category-btn" class="btn btn-secondary btn-sm">Add Category</button>
+          <button id="add-category-btn" class="btn btn-secondary btn-sm" style="background-color: #EC6200;
+          color: white; text-align: center">Add Category</button>
+
         </div>
       </div>
 

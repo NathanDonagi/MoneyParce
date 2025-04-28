@@ -1,0 +1,16 @@
+.subheading {
+    color: orange;
+}
+
+.title {
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+.paragraph {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    padding: 5px;
+}
