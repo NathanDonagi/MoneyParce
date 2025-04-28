@@ -35,10 +35,19 @@ class BudgetForm(forms.ModelForm):
         fields = ("name", "category", "limit", "expense")
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # Grab user if passed
         super().__init__(*args, **kwargs)
         for field_name in self.fields:
             self.fields[field_name].help_text = None
-        self.fields['category'].empty_label = ""
+        if self.user:
+            categories = Category.objects.filter(user=self.user).order_by('name')
+            if not categories.exists():
+                self.fields['category'].empty_label = "No categories available. Please create a category first."
+                self.fields['category'].widget.attrs['disabled'] = 'disabled'
+                self.fields['category'].help_text = "You need to create a category before creating a budget."
+            else:
+                self.fields['category'].empty_label = "Select a category"
+            self.fields['category'].queryset = categories
 
 
 class TransactionForm(forms.ModelForm):
@@ -53,10 +62,19 @@ class TransactionForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)  # Grab user if passed
         super().__init__(*args, **kwargs)
         for field_name in self.fields:
             self.fields[field_name].help_text = None
-        self.fields['category'].empty_label = ""
+        if self.user:
+            categories = Category.objects.filter(user=self.user).order_by('name')
+            if not categories.exists():
+                self.fields['category'].empty_label = "No categories available. Please create a category first."
+                self.fields['category'].widget.attrs['disabled'] = 'disabled'
+                self.fields['category'].help_text = "You need to create a category before creating a transaction."
+            else:
+                self.fields['category'].empty_label = "Select a category"
+            self.fields['category'].queryset = categories
         amount = self.initial.get('amount') or getattr(self.instance, 'amount', None)
         if amount is not None:
             self.initial['amount'] = "{:.2f}".format(amount)

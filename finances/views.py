@@ -221,16 +221,16 @@ def budgets(request):
 def budgets_form(request):
     template_data = {'title': 'Budgets'}
     if request.method == 'GET':
-        template_data['form'] = BudgetForm()
+        template_data['form'] = BudgetForm(user=request.user)
         return render(request, 'finances/budgetsForm.html', {
             'template_data': template_data})
     elif request.method == 'POST':
-        budget_form = BudgetForm(request.POST, error_class=CustomErrorList)
+        budget_form = BudgetForm(request.POST, user=request.user, error_class=CustomErrorList)
 
         if budget_form.is_valid():
-            transaction = budget_form.save(commit=False)
-            transaction.user = request.user
-            transaction.save()
+            budget = budget_form.save(commit=False)
+            budget.user = request.user
+            budget.save()
             return redirect('finances.budgets')
         else:
             template_data['form'] = budget_form
@@ -250,9 +250,8 @@ def edit_budget(request, budget_id):
     budget = get_object_or_404(Budget, id=budget_id, user=request.user)
     template_data = {'title': 'Edit Budget'}
 
-
     if request.method == 'POST':
-        form = BudgetForm(request.POST, instance=budget, error_class=CustomErrorList)
+        form = BudgetForm(request.POST, instance=budget, user=request.user, error_class=CustomErrorList)
         if form.is_valid():
             budget = form.save(commit=False)
             budget.user = request.user
@@ -260,7 +259,7 @@ def edit_budget(request, budget_id):
             return redirect('finances.budgets')
         template_data['form'] = form
     else:
-        template_data['form'] = BudgetForm(instance=budget)
+        template_data['form'] = BudgetForm(instance=budget, user=request.user)
 
     return render(request, 'finances/budgetEditForm.html',
                   {'template_data': template_data, 'budget': budget})
@@ -277,11 +276,11 @@ def transactions(request):
 def transactions_form(request):
     template_data = {'title': 'Transactions'}
     if request.method == 'GET':
-        template_data['form'] = TransactionForm()
+        template_data['form'] = TransactionForm(user=request.user)
         return render(request, 'finances/transactionsForm.html', {
             'template_data': template_data})
     elif request.method == 'POST':
-        transaction_form = TransactionForm(request.POST, error_class=CustomErrorList)
+        transaction_form = TransactionForm(request.POST, user=request.user, error_class=CustomErrorList)
 
         if transaction_form.is_valid():
             transaction = transaction_form.save(commit=False)
@@ -306,9 +305,8 @@ def edit_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
     template_data = {'title': 'Edit Transaction'}
 
-
     if request.method == 'POST':
-        form = TransactionForm(request.POST, instance=transaction, error_class=CustomErrorList)
+        form = TransactionForm(request.POST, instance=transaction, user=request.user, error_class=CustomErrorList)
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
@@ -316,7 +314,7 @@ def edit_transaction(request, transaction_id):
             return redirect('finances.transactions')
         template_data['form'] = form
     else:
-        template_data['form'] = TransactionForm(instance=transaction)
+        template_data['form'] = TransactionForm(instance=transaction, user=request.user)
 
     return render(request, 'finances/transactionsEditForm.html',
                   {'template_data': template_data, 'transaction': transaction})

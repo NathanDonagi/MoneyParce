@@ -7,8 +7,8 @@ import json
 
 from finances.models import Transaction, Category, Budget
 
-@login_required
-def financial_reports(request):
+@login_required(login_url='login')
+def reports(request):
     """View for displaying financial reports and visualizations."""
     # Get date range for filtering
     end_date = timezone.now().date()
@@ -25,27 +25,36 @@ def financial_reports(request):
     total_expenses = transactions.filter(isExpense=True).aggregate(Sum('amount'))['amount__sum'] or 0
     
     # Get category-wise expenses
-    category_expenses = {}
+    category_expenses = []
     for category in Category.objects.filter(user=request.user):
         amount = transactions.filter(category=category, isExpense=True).aggregate(Sum('amount'))['amount__sum'] or 0
         if amount > 0:
-            category_expenses[category.name] = amount
+            category_expenses.append({
+                'name': category.name,
+                'amount': amount
+            })
+    
+    # Sort categories by expense amount (descending)
+    category_expenses.sort(key=lambda x: x['amount'], reverse=True)
     
     # Prepare data for charts
     chart_data = {
-        'categories': list(category_expenses.keys()),
-        'expenses': list(category_expenses.values()),
+        'categories': [cat['name'] for cat in category_expenses],
+        'expenses': [cat['amount'] for cat in category_expenses],
         'total_income': total_income,
         'total_expenses': total_expenses,
-        'net_balance': total_income - total_expenses
+        'net_balance': total_income - total_expenses,
+        'has_expenses': len(category_expenses) > 0
     }
     
     context = {
-        'chart_data': json.dumps(chart_data),
+        'template_data': {'title': 'Financial Reports'},
         'total_income': total_income,
         'total_expenses': total_expenses,
         'net_balance': total_income - total_expenses,
         'category_expenses': category_expenses,
+        'chart_data': json.dumps(chart_data),
+        'has_expenses': len(category_expenses) > 0
     }
     
     return render(request, 'reports/financial_reports.html', context)
