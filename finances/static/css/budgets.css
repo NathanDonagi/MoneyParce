@@ -60,6 +60,85 @@ body.modal-open #page-content {
   pointer-events: none;
   user-select: none;
 }
+.btn {
+    border-radius: 5px;
+    font-size: 14px;
+    padding: 8px 16px;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.btn-purple {
+    background-color: #6f42c1;
+    color: white;
+    border: none;
+}
+
+.btn-purple:hover {
+    background-color: #5a2d91;
+}#category-list .category-item {
+    margin-bottom: 10px;
+    border-radius: 8px;
+    padding: 10px;
+    color: white;
+    cursor: pointer;
+}
+
+#category-list .category-item:hover {
+    opacity: 0.8;
+}
+
+#category-list .delete-category-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+#category-list .delete-category-btn:hover {
+    background-color: #c82333;
+}
+
+.category-name {
+    font-weight: bold;
+}
+
+/* Category Sidebar Styles */
+#category-list {
+    padding: 0;
+}
+
+#add-category-btn {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #6f42c1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    width: 100%;
+}
+
+#add-category-btn:hover {
+    background-color: #5a2d91;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .budget-box {
+        padding: 10px;
+    }
+
+    .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+
+    .sort-btn {
+        padding: 6px 12px;
+    }
+}
 
 .sort-btn.active {
   background-color: #da560e;
