@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth import login as auth_login, authenticate, logout as auth_logout
-from .forms import CustomUserCreationForm, CustomErrorList
+from .forms import CustomUserCreationForm, CustomErrorList, ResetPasswordForm
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from .models import CustomUser
@@ -42,8 +42,28 @@ def signup(request):
 
         if user_form.is_valid():
             user_form.save()
-            return redirect('templates.login')
+            return redirect('accounts.login')
         else:
             template_data['userForm'] = user_form
             return render(request, 'signup.html',
+                          {'template_data': template_data})
+
+def reset(request):
+    template_data = {}
+    template_data['title'] = 'Reset Password'
+    if request.method == 'GET':
+        form = ResetPasswordForm()
+        template_data['userForm'] = form
+        return render(request, 'reset.html',
+                      {'template_data': template_data})
+    elif request.method == 'POST':
+        form = ResetPasswordForm(request.POST, error_class=CustomErrorList)
+        if form.is_valid():
+            user = CustomUser.objects.get(username=form.cleaned_data['username'])
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            return redirect('accounts.login')
+        else:
+            template_data['userForm'] = form
+            return render(request, 'reset.html',
                           {'template_data': template_data})
