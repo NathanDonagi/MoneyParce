@@ -106,3 +106,100 @@ body.modal-open #page-content {
   color: white;
 }
 
+.category-box {
+    background-color: #FFA737;
+    border-radius: 12px;
+    padding: 16px;
+}
+button {
+    all: unset; /* Remove all default button styles */
+    display: inline-flex; /* Ensure the button behaves like an inline-flex container */
+    align-items: center; /* Vertically center content */
+    justify-content: center; /* Horizontally center content */
+    cursor: pointer; /* Set the pointer cursor */
+    text-align: center; /* Center text inside button */
+    background: none; /* Remove default background */
+    border: none; /* Remove default border */
+    padding: 0; /* Remove any default padding */
+}
+
+.add-transaction-btn {
+    background: #7E5BEF !important; /* Purple background */
+    border: none !important; /* Remove border */
+    color: white !important; /* White text */
+    padding: 20px 16px 20px !important; /* Padding */
+    border-radius: 9999px !important; /* Rounded corners */
+    font-weight: 600 !important; /* Bold text */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
+.add-transaction-btn:hover {
+    background-color: #6b4bd8 !important; /* Slightly darker purple on hover */
+}
+
+.plus-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    color: #7E5BEF;
+    font-size: 16px;
+    border-radius: 50%;
+}
+
+.add-transaction-container {
+    display: flex;
+    justify-content: left;
+    margin-bottom: 16px;
+}
+.category-item.editing, .category-item.deleting {
+    background-color: #EC6200;
+}
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    padding-top: 5px;
+}
+.edit-btn:hover, .delete-btn:hover {
+    color: #EC7909;
+}
+
+.add-category-btn {
+    background: #7E5BEF !important; /* Purple background */
+    color: white !important;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 9999px; /* Fully rounded */
+    font-weight: 600;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-category-btn:hover {
+    background-color: #6b4bd8; /* Darker purple on hover */
+}
+
+.text-start {
+    padding-bottom: 20px;
+}
+
+.category-title {
+    color: white;
+}
+
