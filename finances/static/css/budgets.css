@@ -12,10 +12,20 @@
     justify-content: space-between;
     align-items: center;
 }
+.btn-orange {
+  background-color: orange;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px; /* optional: makes it a little rounded */
+  cursor: pointer; /* makes cursor a hand on hover */
+}
+
 
 .progress {
     height: 10px;
-    background-color: #e9ecef;
+    background-color: #FFA737;
     border-radius: 5px;
     margin-bottom: 5px;
     text-align: left;
@@ -60,95 +70,21 @@ body.modal-open #page-content {
   pointer-events: none;
   user-select: none;
 }
-.btn {
-    border-radius: 5px;
-    font-size: 14px;
-    padding: 8px 16px;
-    cursor: pointer;
-    text-align: center;
-    display: inline-block;
-    transition: background-color 0.3s ease;
-}
-
-.btn-purple {
-    background-color: #6f42c1;
-    color: white;
-    border: none;
-}
-
-.btn-purple:hover {
-    background-color: #5a2d91;
-}#category-list .category-item {
-    margin-bottom: 10px;
-    border-radius: 8px;
-    padding: 10px;
-    color: white;
-    cursor: pointer;
-}
-
-#category-list .category-item:hover {
-    opacity: 0.8;
-}
-
-#category-list .delete-category-btn {
-    background-color: #dc3545;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-#category-list .delete-category-btn:hover {
-    background-color: #c82333;
-}
-
-.category-name {
-    font-weight: bold;
-}
-
-/* Category Sidebar Styles */
-#category-list {
-    padding: 0;
-}
-
-#add-category-btn {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: #6f42c1;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    width: 100%;
-}
-
-#add-category-btn:hover {
-    background-color: #5a2d91;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .budget-box {
-        padding: 10px;
-    }
-
-    .btn {
-        font-size: 12px;
-        padding: 6px 12px;
-    }
-
-    .sort-btn {
-        padding: 6px 12px;
-    }
-}
 
 .sort-btn.active {
-  background-color: #EC6200;
+  background-color: #da560e;
   color: white;
 }
 
+h5 {
+    color: white;
+}
+
 .spending_container {
-    background-color: #EC6200; /* light gray */
+    background-color: #7366FF; /* light gray */
+    color: white;
     padding: 20px;
-    border-radius: 20px;
+    border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     max-width: 500px;
     margin-left: auto;
@@ -156,3 +92,9 @@ body.modal-open #page-content {
     text-align: left;
 }
 
+.card {
+    background: linear-gradient(to bottom, #FFBE0A, #EC6200); /* Orange ombre */
+    color: white; /* Optional: make text white for contrast */
+    border: none; /* Optional: remove default card border */
+
+}

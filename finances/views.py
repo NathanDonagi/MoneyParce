@@ -1,41 +1,80 @@
-import json # Add json import
+import json
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import transaction # Import transaction
-from django.db.models import Max, Sum  # Import Max
-from django.template.context_processors import request
-from django.views.decorators.http import require_POST, require_http_methods  # Import require_POST
-from django.http import JsonResponse, HttpResponseRedirect  # Import JsonResponse
-from django.utils import timezone
-from datetime import timedelta
-
-
+from django.db import transaction
+from django.views.decorators.http import require_POST, require_http_methods
+from django.http import JsonResponse, HttpResponseRedirect
 from .models import Budget, Transaction, Category
 from .forms import BudgetForm, TransactionForm, CustomErrorList, CategoryForm
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.db.models import Sum
+from .models import Budget
+from .deepSeak import generate_advice
+from django.utils import timezone
+from datetime import timedelta
 
 
 @login_required(login_url='login')
 def profile(request):
     user = request.user
     template_data = {'title': 'Profile'}
+
+    last_month = timezone.now() - timedelta(days=30)
     budgets = Budget.objects.filter(user=user)
+    transactions = Transaction.objects.filter(user=user, date__gte=last_month).order_by('-date')
+
     total_limit = budgets.aggregate(Sum('limit'))['limit__sum'] or 0
     total_expense = budgets.aggregate(Sum('expense'))['expense__sum'] or 0
+    remaining_budget = total_limit - total_expense
 
-    advice = [
-        "Make sure to track your expenses regularly to stay on top of your budget.",
-        "Consider setting up alerts when you're close to reaching your budget limits.",
-        "Review your spending habits monthly to avoid unnecessary expenses."
-    ]
+    advice = []
+    try:
+            prompt = f"""Analyze this financial profile for {user.email}:
+
+            Budget Overview:
+            - Total Budget: ${total_limit:.2f}
+            - Total Spent: ${total_expense:.2f}
+            - Remaining Budget: ${remaining_budget:.2f}
+
+            Individual Budgets:
+            {chr(10).join([f"- {b.name} ({b.category.name}): ${b.limit:.2f} limit, ${b.expense:.2f} spent" for b in budgets])}
+
+            Recent Transactions:
+            {chr(10).join([f"{t.date}: {t.name} - {t.category.name} - ${t.amount:.2f}" for t in transactions])}
+
+            Generate 5 clear financial recommendations as a plain text list with no extra formating. Focus on:
+            1. Specific spending reductions
+            2. Budget optimization strategies
+            3. Savings opportunities
+            4. Expense tracking improvements
+            5. Personalized advice based on transaction patterns
+
+            Format as:
+            1. First recommendation
+            2. Second recommendation
+            3. Third recommendation..."""
+
+            advice = generate_advice(prompt)
+
+    except Exception as e:
+        print(f"Deepseek error: {str(e)}")
+
+    if not advice:
+        advice = [
+            "Error could not generate advice, using Fallback advice."
+            "Track expenses regularly to stay within budget",
+            "Review recurring subscriptions for potential savings",
+            "Consider setting aside 20% of income for emergencies",
+            "Categorize expenses to identify spending patterns",
+            "Set up budgets to track your progress"
+        ]
 
     return render(request, 'finances/profile.html', {
         'template_data': template_data,
         'total_limit': total_limit,
         'total_expense': total_expense,
+        'remaining_budget': remaining_budget,
         'advice': advice,
     })
-
 
 @login_required
 def create_category(request):

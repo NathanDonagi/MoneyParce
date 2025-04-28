@@ -1,21 +1,24 @@
+
 {% block content %}
-<div class="p-3 mt-4">
-  <div class="container">
-    <div class="row justify-content-center">
-        <div class="card p-3 mb-4 rounded">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/budgets.css' %}">
+{#<div class="p-3 mt-4">#}
+{#  <div class="container">#}
+{#    <div class="row justify-content-center">#}
+        <div class="p-3 mb-4 rounded" style="background-color: #FFA737; border: none;">
           <div class="card-body">
-            <h2>Enter Budget</h2>
+            <h2 style = "color: white; text-align: center;">Enter Budget</h2>
             <hr />
             <form action="{% url 'finances.budgets_form' %}" method="POST">
               {% csrf_token %}
               {{ template_data.form.as_p }}
               <button type="submit"
-                class="btn bg-dark text-white">Submit
+                class="btn" style = "color: white; background-color: #7366FF; text-align: center;">Submit
               </button>
             </form>
-          </div>
-      </div>
-    </div>
+{#          </div>#}
+{#      </div>#}
+{#    </div>#}
   </div>
 </div>
 {% endblock content %}
