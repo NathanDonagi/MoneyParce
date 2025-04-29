@@ -286,6 +286,14 @@ def transactions_form(request):
             transaction = transaction_form.save(commit=False)
             transaction.user = request.user
             transaction.save()
+            
+            # Update budget expense if this is an expense transaction
+            if transaction.isExpense:
+                budget = Budget.objects.filter(user=request.user, category=transaction.category).first()
+                if budget:
+                    budget.expense += transaction.amount
+                    budget.save()
+            
             return redirect('finances.transactions')
         else:
             template_data['form'] = transaction_form
@@ -297,6 +305,13 @@ def delete_transaction(request, transaction_id):
     transaction = get_object_or_404(Transaction, id=transaction_id, user=request.user)
 
     if request.method == "POST":
+        # Update budget expense if this is an expense transaction
+        if transaction.isExpense:
+            budget = Budget.objects.filter(user=request.user, category=transaction.category).first()
+            if budget:
+                budget.expense -= transaction.amount
+                budget.save()
+        
         transaction.delete()
         return redirect('finances.transactions')
 
@@ -308,9 +323,31 @@ def edit_transaction(request, transaction_id):
     if request.method == 'POST':
         form = TransactionForm(request.POST, instance=transaction, user=request.user, error_class=CustomErrorList)
         if form.is_valid():
+            # Store old values for budget update
+            old_amount = transaction.amount
+            old_category = transaction.category
+            old_is_expense = transaction.isExpense
+            
+            # Save the transaction
             transaction = form.save(commit=False)
             transaction.user = request.user
             transaction.save()
+            
+            # Update budgets
+            if old_is_expense:
+                # Subtract old amount from old budget
+                old_budget = Budget.objects.filter(user=request.user, category=old_category).first()
+                if old_budget:
+                    old_budget.expense -= old_amount
+                    old_budget.save()
+            
+            if transaction.isExpense:
+                # Add new amount to new budget
+                new_budget = Budget.objects.filter(user=request.user, category=transaction.category).first()
+                if new_budget:
+                    new_budget.expense += transaction.amount
+                    new_budget.save()
+            
             return redirect('finances.transactions')
         template_data['form'] = form
     else:
