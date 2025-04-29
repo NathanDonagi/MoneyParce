@@ -128,7 +128,13 @@
             bars: 'horizontal',
             legend: { position: 'none' },
             colors: ['#4BC0C0', '#FF6384'],
-            height: 400
+            height: 400,
+            hAxis: {
+                minValue: 0,
+                viewWindow: {
+                    min: 0
+                }
+            }
         };
 
         const chart = new google.visualization.BarChart(document.getElementById('incomeExpenseChart'));
