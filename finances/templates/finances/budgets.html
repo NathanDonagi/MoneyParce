@@ -14,7 +14,6 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
-
 </header>
 
 <!-- Page content wrapper -->
@@ -63,7 +62,7 @@
           border-radius: 5px;
           cursor: pointer;">Create New Budget</button>
         <!-- Sort Buttons -->
-        <div class="col-md-8 text-start mb-3">
+        <div class="sort-buttons col-md-8 text-start mb-3"> <!-- maybe put sort-buttons here -->
           <button id="sort-category" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Category</button>
           <button id="sort-limit" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Limit</button>
           <button id="sort-expense" class="sort-btn btn btn-outline-secondary btn-sm">Sort by Expense</button>
@@ -82,14 +81,14 @@
                     <div class="col text-start" style="color: white; padding-left: 30px">
                       <div class="text-muted small">{{ budget.category.name }}</div>
                       <strong>{{ budget.name }}</strong><br>
-                      <div class="progress mt-2" style="height: 20px; width: 80%; max-width: 1000px">
+                      <div class="progress mt-2" style="height: 20px; width: 80%; max-width: 1000px; background-color: white; border-radius: 10px;">
                         {% with percentage=budget.expense|divide:budget.limit|multiply:100 %}
                         <div class="progress-bar
                           {% if percentage > 90 %}bg-danger
                           {% elif percentage > 70 %}bg-warning
                           {% else %}bg-success{% endif %}"
                           role="progressbar"
-                          style="width: {{ percentage }}%"
+                          style="width: {{ percentage }}%;"
                           aria-valuenow="{{ percentage }}"
                           aria-valuemin="0"
                           aria-valuemax="100">
@@ -159,6 +158,9 @@
 <div id="popup-modal"></div>
 
 <script>
+
+
+
     // Function to get CSRF token
     function getCookie(name) {
         let cookieValue = null;
@@ -385,12 +387,12 @@
             // Update the DOM
             $('#budget-list').empty().append(budgets);
         }
-
         // Sort button event handlers
         $('.sort-btn').click(function() {
             $('.sort-btn').removeClass('active');
             $(this).addClass('active');
             const sortType = $(this).attr('id').split('-')[1];
+
             localStorage.setItem('lastBudgetSortType', sortType);
             sortBudgets(sortType);
         });
