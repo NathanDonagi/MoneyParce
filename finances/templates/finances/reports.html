@@ -149,9 +149,14 @@
         const spendingData = period === 'weekly' ? weeklySpending : monthlySpending;
         Object.entries(spendingData).forEach(([date, amount]) => {
             // Format the date for display
-            const displayDate = period === 'weekly' 
-                ? `Week of ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                : new Date(date + '-01').toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            let displayDate;
+            if (period === 'weekly') {
+                displayDate = `Week of ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+            } else {
+                // For monthly data, ensure we're using the correct month
+                const [year, month] = date.split('-');
+                displayDate = new Date(year, parseInt(month) - 1).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            }
             data.addRow([displayDate, amount]);
         });
 

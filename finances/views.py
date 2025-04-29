@@ -403,16 +403,33 @@ def reports(request):
     
     # Get monthly spending data
     monthly_spending = {}
-    current_date = start_date
-    while current_date <= end_date:
+    # Start from the first day of the month that contains start_date
+    current_date = start_date.replace(day=1)
+    # End at the last day of the month that contains end_date
+    if end_date.month == 12:
+        last_month = end_date.replace(year=end_date.year + 1, month=1, day=1) - timedelta(days=1)
+    else:
+        last_month = end_date.replace(month=end_date.month + 1, day=1) - timedelta(days=1)
+    
+    while current_date <= last_month:
+        # Get the last day of the current month
+        if current_date.month == 12:
+            month_end = current_date.replace(year=current_date.year + 1, month=1, day=1) - timedelta(days=1)
+        else:
+            month_end = current_date.replace(month=current_date.month + 1, day=1) - timedelta(days=1)
+        
         month_key = current_date.strftime('%Y-%m')
         amount = transactions.filter(
-            date__year=current_date.year,
-            date__month=current_date.month,
+            date__range=[current_date, month_end],
             isExpense=True
         ).aggregate(Sum('amount'))['amount__sum'] or 0
         monthly_spending[month_key] = amount
-        current_date += timedelta(days=32)  # Move to next month
+        
+        # Move to the first day of next month
+        if current_date.month == 12:
+            current_date = current_date.replace(year=current_date.year + 1, month=1, day=1)
+        else:
+            current_date = current_date.replace(month=current_date.month + 1, day=1)
     
     context = {
         'template_data': {'title': 'Financial Reports'},
